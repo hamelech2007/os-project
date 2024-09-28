@@ -1,5 +1,5 @@
-.global _start
-.extern long_mode_start
+.global _start, gdt_flush, error
+.extern long_mode_start, initGdt, kernel_code_segment, entry_32
 
 .section .text
 .code32
@@ -15,7 +15,9 @@ _start:
     call enable_paging
 
 
+
     lgdt gdt64_pointer
+
     jmp $gdt64_code_segment, $long_mode_start
     
     hlt
@@ -113,6 +115,8 @@ error:
     movb %al, 0xb800a
     hlt
 
+
+
 .section .bss
 .align 4096
 page_table_l4:
@@ -125,11 +129,20 @@ stack_bottom:
     .skip 4096*4
 stack_top:
 
+.section .data
+.align 4096
+tss_start:
+    .quad 0
+tss_end:
+
 .section .rodata
 gdt64:
     .quad 0
 .equ gdt64_code_segment, . - gdt64
     .quad (1 << 43) | (1 << 44) | (1 << 47) | (1 << 53)
+
 gdt64_pointer:
     .short . - gdt64 - 1
     .quad gdt64
+
+

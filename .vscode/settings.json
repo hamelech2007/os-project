@@ -1,0 +1,12 @@
+{
+    "files.associations": {
+        "*.S": "gas",
+        "*.asm": "asm-intel-x86-generic",
+        "stdint.h": "c",
+        "gdt.h": "c",
+        "stddef.h": "c",
+        "print.h": "c",
+        "memory.h": "c",
+        "idt.h": "c"
+    }
+}
