@@ -65,7 +65,7 @@ irq_common_stub:
     movq %rsp, %rdi # pass rsp as first parameter, basically struct regs
     call irq_handler
 
-    pop %rax // remove cr2
+    pop %rax # remove cr2
 
     pop %rax
     movq %rax, %cr3
@@ -90,12 +90,12 @@ irq_common_stub:
     popq %rdi
     popq %rsi
     popq %rbp
-    // he adds 8 because of the zero, remember to check
+    # he adds 8 because of the zero, remember to check
     popq %rbx
     popq %rdx
     popq %rcx
     popq %rax
 
-    addq $16, %rsp // get rid of int_num and error_code
+    addq $16, %rsp # get rid of int_num and error_code
     sti
     iretq

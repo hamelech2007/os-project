@@ -1,10 +1,10 @@
-#include "stdio.h"
+
 #include "stdint.h"
+#include "stdio.h"
 #include "print.h"
 #include "stdarg.h"
 
-void printf_number(uint64_t* argp, int length, bool sign, int radix, uint8_t* currentParamNum);
-
+void printf_number(uint64_t value, int length, bool sign, int radix);
 
 #define PRINTF_STATE_NORMAL         0
 #define PRINTF_STATE_LENGTH         1
@@ -31,7 +31,7 @@ void printf(const char* fmt, ...) {
     int radix = 10;
     bool sign = false;
 
-    uint8_t paramNum = 1;
+    uint64_t paramNum = 2;
 
 
     while(*fmt) {
@@ -77,26 +77,32 @@ void printf(const char* fmt, ...) {
             PRINTF_STATE_SPEC_:
                 switch (*fmt)
                 {
-                    case 'c':   print_char((char) getArgument(paramNum++, argp));
+                    case 'c':   print_char((char) GET_VA_ARG(paramNum));
+                                paramNum++;
                                 break;
-                    case 's':   print_str(*(char**) getArgument(paramNum++, argp));
+                    case 's':   print_str((char*) GET_VA_ARG(paramNum));
+                                paramNum++;
                                 break;
                     case '%':   print_char('%');
                                 break;
                     case 'd':
                     case 'i':   radix = 10; sign = true;
-                                printf_number(argp, length, sign, radix, &paramNum);
+                                printf_number(GET_VA_ARG(paramNum), length, sign, radix);
+                                paramNum++;
                                 break;
                     case 'u':   radix = 10; sign = false;
-                                printf_number(argp, length, sign, radix, &paramNum);
+                                printf_number(GET_VA_ARG(paramNum), length, sign, radix);
+                                paramNum++;
                                 break;
                     case 'X':
                     case 'x':
                     case 'p':   radix = 16; sign = false;
-                                printf_number(argp, length, sign, radix, &paramNum);
+                                printf_number(GET_VA_ARG(paramNum), length, sign, radix);
+                                paramNum++;
                                 break;
                     case 'o':   radix = 8; sign = false;
-                                printf_number(argp, length, sign, radix, &paramNum);
+                                printf_number(GET_VA_ARG(paramNum), length, sign, radix);
+                                paramNum++;
                                 break;
                     default: break; // ignore invalid specifiers
                 }
@@ -113,7 +119,7 @@ void printf(const char* fmt, ...) {
 
 const char g_HexChars[] = "0123456789abcdef";
 
-void printf_number(uint64_t* argp, int length, bool sign, int radix, uint8_t* currentParamNum) {
+void printf_number(uint64_t value, int length, bool sign, int radix) {
     char buffer[32];
     unsigned long long number;
     int number_sign = 1;
@@ -125,40 +131,40 @@ void printf_number(uint64_t* argp, int length, bool sign, int radix, uint8_t* cu
         case PRINTF_LENGTH_SHORT:
         case PRINTF_LENGTH_DEFAULT:
             if(sign) {
-                int n = getArgument(*(currentParamNum)++, argp);
+                int n = value;
                 if(n < 0) {
                     n = -n;
                     number_sign = -1;
                 }
                 number = (unsigned long long) n;
             } else {
-                number = (unsigned int) getArgument(*(currentParamNum)++, argp);
+                number = (unsigned int) value;
                 number_sign = 1;
             }
             break;
         case PRINTF_LENGTH_LONG:
             if(sign) {
-                long int n = (long int) getArgument(*(currentParamNum)++, argp);
+                long int n = (long int) value;
                 if(n < 0) {
                     n = -n;
                     number_sign = -1;
                 }
                 number = (unsigned long long) n;
             } else {
-                number = (unsigned long int) getArgument(*(currentParamNum)++, argp);
+                number = (unsigned long int) value;
                 number_sign = 1;
             }
             break;
         case PRINTF_LENGTH_LONG_LONG:
             if(sign) {
-                long long int n = (long long int) getArgument(*(currentParamNum)++, argp);
+                long long int n = (long long int) value;
                 if(n < 0) {
                     n = -n;
                     number_sign = -1;
                 }
                 number = (unsigned long long) n;
             } else {
-                number = (unsigned long long) getArgument(*(currentParamNum)++, argp);
+                number = (unsigned long long) value;
                 number_sign = 1;
             }
             break;

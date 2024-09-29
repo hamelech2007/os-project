@@ -77,6 +77,18 @@ void print_str(char* string) {
         print_char(character); 
     }
 }
+char* hexChars = "0123456789abcdef";
+void print_hex(uint8_t num) {
+    char buffer[32];
+    buffer[31] = 0;
+    int i = 30;
+    do {
+        buffer[i--] = hexChars[num%16];
+        num/=16;
+    } while(num != 0);
+
+    print_str(buffer + i + 1);
+}
 
 void print_int(uint8_t num) {
     char buffer[32];
@@ -93,4 +105,18 @@ void print_int(uint8_t num) {
 
 void print_set_color(uint8_t foreground, uint8_t background) {
     color = foreground | (background << 4);
+}
+
+void delete_char() {
+    struct Char empty = (struct Char) {
+        character: ' ',
+        color: color
+    };
+
+    if(col == 0 && row == 0) return;
+    if(col == 0){
+        col = NUM_COLS;
+        row--;
+    } else col--;
+    buffer[col + NUM_COLS * row] = empty;
 }

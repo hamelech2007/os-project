@@ -11,6 +11,8 @@
         "stdint-gcc.h": "c",
         "stdio.h": "c",
         "util.h": "c",
-        "isr.h": "c"
+        "isr.h": "c",
+        "stdarg.h": "c",
+        "keyboard.h": "c"
     }
 }

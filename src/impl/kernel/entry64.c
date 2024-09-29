@@ -14,5 +14,6 @@ void entry_64() {
     print_set_color(PRINT_COLOR_YELLOW, PRINT_COLOR_BLACK);
     print_str("Gdt and Idt are both setup!\n");
 
+
     kernel_main();
 }

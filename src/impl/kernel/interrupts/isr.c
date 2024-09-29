@@ -2,6 +2,7 @@
 #include "util.h"
 #include "stdio.h"
 #include "print.h"
+#include "keyboard.h"
 
 void picEOI() {
     outPortB(0x20, 0x20);
@@ -13,37 +14,38 @@ void slavePicEOI() {
 }
 
 char* interrupt_messages[] = {
-    "Divide By Zero",
-    "Debug",
-    "NMI",
-    "Breakpoint",
-    "Into Detected Overflow",
-    "Out of Bounds",
-    "Invalid Opcode",
-    "No Coprocessor",
-    "Double Fault",
-    "Coprocessor Segment Overrun",
-    "Bad TSS",
-    "Segment not Present",
-    "Stack Fault",
-    "General Protection Fault",
-    "Page Fault",
-    "Unknown Interrupt",
-    "Coprocessor Fault",
-    "Alignment Fault",
-    "Machine Check",
-    "SIMD Floating-Point Exception",
-    "Virtualization Exception",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Security Exception",
-    "Reserved"
+    "Divide By Zero",                   // 0    Fault       No Error Code
+    "Debug",                            // 1    Fault/Trap  No Error Code
+    "NMI",                              // 2    Interrupt   No Error Code
+    "Breakpoint",                       // 3    Trap        No Error Code
+    "Into Detected Overflow",           // 4    Trap        No Error Code
+    "Out of Bounds",                    // 5    Fault       No Error Code
+    "Invalid Opcode",                   // 6    Fault       No Error Code
+    "No Coprocessor",                   // 7    Fault       No Error Code
+    "Double Fault",                     // 8    Abort       Error Code Present (0)
+    "Coprocessor Segment Overrun",      // 9    Fault       No Error Code   
+    "Bad TSS",                          // 10   Fault       Error Code Present
+    "Segment not Present",              // 11   Fault       Error Code Present
+    "Stack Fault",                      // 12   Fault       Error Code Present
+    "General Protection Fault",         // 13   Fault       Error Code Present
+    "Page Fault",                       // 14   Fault       Error Code Present
+    "Unknown Interrupt",                // 15   
+    "Coprocessor Fault",                // 16   Fault       No Error Code
+    "Alignment Fault",                  // 17   Fault       Error Code Present
+    "Machine Check",                    // 18
+    "SIMD Floating-Point Exception",    // 19  
+    "Virtualization Exception",         // 20
+    "Control Protection Exception",     // 21
+    "Reserved",                         // 22
+    "Reserved",                         // 23
+    "Reserved",                         // 24
+    "Reserved",                         // 25
+    "Reserved",                         // 26
+    "Reserved",                         // 27
+    "Hypervisor Injection Exception",   // 28
+    "VMM Communication Exception",      // 29
+    "Security Exception",               // 30
+    "Reserved"                          // 31
 };
 
 void (*isr_routines[])(struct int_regs*) = {
@@ -100,8 +102,7 @@ void irq_handler(struct int_regs* regs) {
 }
 
 void unimplemented(struct int_regs* regs) {
-    if(regs->int_num == 47) return;
-    print_str("Unimplemented Exception Recieved! Number: ");
+    print_str("Unimplemented Interrupt Recieved! Number: ");
     print_int(regs->int_num);
     print_char('\n');
 }
@@ -140,7 +141,8 @@ void timer(struct int_regs* regs) {
 }
 
 void keyboard_press(struct int_regs* regs){
-    // use different colors each time to see easily
+    keyboardHandler(inPortB(0x60));
+    /*// use different colors each time to see easily
     static uint8_t color = PRINT_COLOR_LIGHT_RED;
     color++;
     color%=16;
@@ -150,8 +152,8 @@ void keyboard_press(struct int_regs* regs){
     print_str("Key pressed!\n");
 
     uint8_t scancode = inPortB(0x60);
-    print_str("Scancode: ");
-    print_int(scancode);
-    print_char('\n');
-
+    
+    print_str("Scancode: 0x");
+    print_hex(scancode);
+    print_char('\n');*/
 }

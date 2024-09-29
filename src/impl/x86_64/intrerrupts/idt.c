@@ -80,17 +80,20 @@ void setupIRQ() {
     set_int_gate(47, (uint64_t) irq15, 0, 0, false);
 }
 
+void enableInterrupts() {
+    asm volatile("sti;"); // enable interrupts
+}
+
 void initIdt(){
     memset(&idt, 0, sizeof(idt));
     idt_pointer.base = (uint64_t) &idt;
     idt_pointer.limit = (uint16_t) sizeof(struct idt_entry) * 256 - 1;
 
     setupPic();
-    //outPortB(0x21, 0xef); // mask out irq15 - repeatedly getting called for some reason, need to investigate
     setupGates();
     setupIRQ();
     load_idt(&idt_pointer);
-    asm volatile("sti;"); // enable interrupts
+    enableInterrupts();
 }
 
 void set_int_gate(uint8_t num, uint64_t addr, uint8_t ist, uint8_t dpl, bool user) {
