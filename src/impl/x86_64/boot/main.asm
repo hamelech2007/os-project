@@ -18,7 +18,7 @@ _start:
 
     lgdt gdt64_pointer
 
-    jmp $gdt64_code_segment, $long_mode_start
+    ljmp $gdt64_code_segment, $long_mode_start
     
     hlt
 
@@ -128,12 +128,6 @@ page_table_l2:
 stack_bottom:
     .skip 4096*4
 stack_top:
-
-.section .data
-.align 4096
-tss_start:
-    .quad 0
-tss_end:
 
 .section .rodata
 gdt64:

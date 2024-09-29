@@ -1,6 +1,5 @@
 #pragma once
-#include <stdint.h>
-#include <stddef.h>
+#include "stdint.h"
 
 struct gdt_entry {
     uint16_t limit;
@@ -40,4 +39,5 @@ struct Tss64
 } __attribute__((packed));
 void initGdt();
 void setGdtGate(uint32_t num, uint32_t base, uint32_t limit, uint8_t access, uint8_t gran);
-void setTssEntry(uint32_t num_low, uint32_t num_high);
+void setTssEntry(uint32_t num);
+void loadTss(uint16_t tss_selector);

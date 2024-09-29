@@ -1,4 +1,6 @@
 #include "print.h"
+#include "stdio.h"
+#include <stddef.h>
 
 const static size_t NUM_COLS = 80;
 const static size_t NUM_ROWS = 25;
@@ -74,6 +76,19 @@ void print_str(char* string) {
 
         print_char(character); 
     }
+}
+
+void print_int(uint8_t num) {
+    char buffer[32];
+    buffer[31] = 0;
+    int i = 30;
+    do {
+        buffer[i--] = num%10+'0';
+        num/=10;
+    } while(num != 0);
+
+    print_str(buffer + i + 1);
+
 }
 
 void print_set_color(uint8_t foreground, uint8_t background) {

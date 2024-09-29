@@ -1,60 +1,34 @@
 .section .text
 .code64
 
-.macro gen_isr_noerror num
-.global isr\num
-isr\num:
+.macro gen_irq num, arg
+.global irq\num
+irq\num:
     cli
     pushq $0
-    pushq $\num
-    jmp isr_common_stub
+    pushq $\arg
+    jmp irq_common_stub
 .endm
 
-.macro gen_isr_error num
-.global isr\num
-isr\num:
-    cli
-    pushq $\num
-    jmp isr_common_stub
-.endm
+gen_irq 0, 32
+gen_irq 1, 33
+gen_irq 2, 34
+gen_irq 3, 35
+gen_irq 4, 36
+gen_irq 5, 37
+gen_irq 6, 38
+gen_irq 7, 39
+gen_irq 8, 40
+gen_irq 9, 41
+gen_irq 10, 42
+gen_irq 11, 43
+gen_irq 12, 44
+gen_irq 13, 45
+gen_irq 14, 46
+gen_irq 15, 47
 
-gen_isr_noerror 0
-gen_isr_noerror 1
-gen_isr_noerror 2
-gen_isr_noerror 3
-gen_isr_noerror 4
-gen_isr_noerror 5
-gen_isr_noerror 6
-gen_isr_noerror 7
-gen_isr_error   8
-gen_isr_noerror 9
-gen_isr_error   10
-gen_isr_error   11
-gen_isr_error   12
-gen_isr_error   13
-gen_isr_error   14
-gen_isr_noerror 15
-gen_isr_noerror 16
-gen_isr_noerror 17
-gen_isr_noerror 18
-gen_isr_noerror 19
-gen_isr_noerror 20
-gen_isr_noerror 21
-gen_isr_noerror 22
-gen_isr_noerror 23
-gen_isr_noerror 24
-gen_isr_noerror 25
-gen_isr_noerror 26
-gen_isr_noerror 27
-gen_isr_noerror 28
-gen_isr_noerror 29
-gen_isr_noerror 30
-gen_isr_noerror 31
-gen_isr_noerror 128
-gen_isr_noerror 177
-
-.extern isr_handler
-isr_common_stub:
+.extern irq_handler
+irq_common_stub:
     pushq %rax
     pushq %rcx
     pushq %rdx
@@ -89,7 +63,7 @@ isr_common_stub:
     pushq %rax
 
     movq %rsp, %rdi # pass rsp as first parameter, basically struct regs
-    call isr_handler
+    call irq_handler
 
     pop %rax // remove cr2
 

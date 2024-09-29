@@ -5,7 +5,6 @@
 struct idt_entry idt[256];
 struct idt_ptr idt_pointer;
 
-extern void handler();
 
 void setupPic() {
     outPortB(0x20, 0x11);
@@ -62,36 +61,50 @@ void setupGates() {
     set_int_gate(177, (uint64_t) isr177, 0, 0, false); // system calls
 }
 
-void isr_handler(){
-
+void setupIRQ() {
+    set_int_gate(32, (uint64_t) irq0, 0, 0, false);
+    set_int_gate(33, (uint64_t) irq1, 0, 0, false);
+    set_int_gate(34, (uint64_t) irq2, 0, 0, false);
+    set_int_gate(35, (uint64_t) irq3, 0, 0, false);
+    set_int_gate(36, (uint64_t) irq4, 0, 0, false);
+    set_int_gate(37, (uint64_t) irq5, 0, 0, false);
+    set_int_gate(38, (uint64_t) irq6, 0, 0, false);
+    set_int_gate(39, (uint64_t) irq7, 0, 0, false);
+    set_int_gate(40, (uint64_t) irq8, 0, 0, false);
+    set_int_gate(41, (uint64_t) irq9, 0, 0, false);
+    set_int_gate(42, (uint64_t) irq10, 0, 0, false);
+    set_int_gate(43, (uint64_t) irq11, 0, 0, false);
+    set_int_gate(44, (uint64_t) irq12, 0, 0, false);
+    set_int_gate(45, (uint64_t) irq13, 0, 0, false);
+    set_int_gate(46, (uint64_t) irq14, 0, 0, false);
+    set_int_gate(47, (uint64_t) irq15, 0, 0, false);
 }
 
 void initIdt(){
     memset(&idt, 0, sizeof(idt));
     idt_pointer.base = (uint64_t) &idt;
-    idt_pointer.limit = (uint16_t) sizeof(idt) - 1;
+    idt_pointer.limit = (uint16_t) sizeof(struct idt_entry) * 256 - 1;
 
     setupPic();
-    //set_int_gate(33, (uint64_t) handler, 0, 0, false);
-    // setupGates();
+    //outPortB(0x21, 0xef); // mask out irq15 - repeatedly getting called for some reason, need to investigate
+    setupGates();
+    setupIRQ();
     load_idt(&idt_pointer);
     asm volatile("sti;"); // enable interrupts
 }
 
 void set_int_gate(uint8_t num, uint64_t addr, uint8_t ist, uint8_t dpl, bool user) {
-    struct idt_entry entry = idt[num];
-    set_gate_offset(&entry, addr);
-    entry.selector = 0x8 | (user ? 0x3 : 0);
-    entry.ist = (ist & 0x8);
-    entry.type_attributes = (0xe) | (1 << 7); // 64bit-interrupt | present
+    set_gate_offset(&idt[num], addr);
+    idt[num].selector = 0x8 | (user ? 0x3 : 0);
+    idt[num].ist = (ist & 0x8);
+    idt[num].type_attributes = (0xe) | (1 << 7); // 64bit-interrupt | present
 }
 
 void set_trap_gate(uint8_t num, uint64_t addr, uint8_t ist, uint8_t dpl, bool user) {
-    struct idt_entry entry = idt[num];
-    set_gate_offset(&entry, addr);
-    entry.selector = 0x8 | (user ? 0x3 : 0);
-    entry.ist = (ist & 0x8);
-    entry.type_attributes = (0xf) | (1 << 7); // 64bit-trap | present
+    set_gate_offset(&idt[num], addr);
+    idt[num].selector = 0x8 | (user ? 0x3 : 0);
+    idt[num].ist = (ist & 0x8);
+    idt[num].type_attributes = (0xf) | (1 << 7); // 64bit-trap | present
 }
 
 void store_idt(struct idt_ptr *idtr) {

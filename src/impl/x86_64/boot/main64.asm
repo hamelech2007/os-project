@@ -18,7 +18,7 @@ long_mode_start:
 
 long_jump_new_gdt:
     
-    mov $0x10, %ax  # Data segment (0x10 = index 2 in GDT)
+    mov $0x10, %ax  # Kernel Data segment (0x10 = index 2 in GDT)
     mov %ax, %ds
     mov %ax, %es
     mov %ax, %fs

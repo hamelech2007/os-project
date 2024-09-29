@@ -1,7 +1,8 @@
 #pragma once
 #include "stdint.h"
 
-typedef struct idt_entry {
+
+struct idt_entry {
     uint16_t offset_low;
     uint16_t selector;
     uint8_t ist;
@@ -11,7 +12,7 @@ typedef struct idt_entry {
     uint32_t reserved;
 } __attribute__((packed)) ;
 
-typedef struct idt_ptr {
+struct idt_ptr {
     uint16_t limit;
     uint64_t base;
 } __attribute__((packed));
@@ -24,7 +25,6 @@ uint64_t get_gate_offset(struct idt_entry *gate);
 void set_trap_gate(uint8_t num, uint64_t addr, uint8_t ist, uint8_t dpl, bool user);
 void set_int_gate(uint8_t num, uint64_t addr, uint8_t ist, uint8_t dpl, bool user);
 
-void isr_handler();
 extern void isr0();
 extern void isr1();
 extern void isr2();
@@ -60,3 +60,20 @@ extern void isr31();
 
 extern void isr128();
 extern void isr177();
+
+extern void irq0();
+extern void irq1();
+extern void irq2();
+extern void irq3();
+extern void irq4();
+extern void irq5();
+extern void irq6();
+extern void irq7();
+extern void irq8();
+extern void irq9();
+extern void irq10();
+extern void irq11();
+extern void irq12();
+extern void irq13();
+extern void irq14();
+extern void irq15();
