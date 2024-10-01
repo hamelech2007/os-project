@@ -21,3 +21,4 @@ void reserved(struct int_regs* regs);
 
 void timer(struct int_regs* regs);
 void keyboard_press(struct int_regs* regs);
+void mouse_input(struct int_regs* regs);

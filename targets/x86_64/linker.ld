@@ -2,12 +2,18 @@ ENTRY(_start)
 
 SECTIONS
 {
-    . = 2M;
+    . = 1M;
 
     .text BLOCK(4K) : ALIGN(4K)
     {   
         KEEP(*(.multiboot_header))
+        *(.boot)
         *(.text)
+    }
+
+    .note.gnu.build-id BLOCK(4K) : ALIGN(4K)
+    { 
+        *(.note.gnu.build-id)
     }
 
     .rodata BLOCK(4K) : ALIGN(4K)
@@ -25,5 +31,8 @@ SECTIONS
         *(COMMON)
         *(.bss)
     }
+
+
+    _kernel_end = .;
 
 }

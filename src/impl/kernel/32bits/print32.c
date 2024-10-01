@@ -1,5 +1,4 @@
-#include "print.h"
-#include "stdio.h"
+#include "print32.h"
 #include <stddef.h>
 
 const static size_t NUM_COLS = 80;
@@ -10,12 +9,12 @@ struct Char {
     uint8_t color;
 };
 
-struct Char* buffer = (struct Char*) 0xb8000;
-size_t col = 0;
-size_t row = 0;
-uint8_t color = PRINT_COLOR_WHITE | (PRINT_COLOR_BLACK << 4);
+static struct Char* buffer = (struct Char*) 0xb8000;
+static size_t col = 0;
+static size_t row = 0;
+static uint8_t color = PRINT_COLOR_WHITE | (PRINT_COLOR_BLACK << 4);
 
-void clear_row(size_t row) {
+void clear_row32(size_t row) {
     struct Char empty = (struct Char) {
         character: ' ',
         color: color
@@ -27,7 +26,7 @@ void clear_row(size_t row) {
 }
 
 
-void print_newline() {
+void print_newline32() {
     col = 0;
 
     if(row < NUM_ROWS - 1) {
@@ -41,23 +40,23 @@ void print_newline() {
             buffer[col + NUM_COLS * (row - 1)] = character;
         }
     }
-    clear_row(NUM_COLS - 1);
+    clear_row32(NUM_COLS - 1);
 }
 
-void print_clear() {
+void print_clear32() {
     for(size_t i = 0; i < NUM_ROWS; i++) {
-        clear_row(i);
+        clear_row32(i);
     }
 }
 
-void print_char(char character) {
+void print_char32(char character) {
     if(character == '\n') {
-        print_newline();
+        print_newline32();
         return;
     }
 
     if(col > NUM_COLS) {
-        print_newline();
+        print_newline32();
     }
 
     buffer[col + NUM_COLS * row] = (struct Char) {
@@ -68,17 +67,17 @@ void print_char(char character) {
     col++;
 }
 
-void print_str(char* string) {
+void print_str32(char* string) {
     for(size_t i = 0; 1; i++){
         char character = (uint8_t) string[i];
 
         if(character == 0) return;
 
-        print_char(character); 
+        print_char32(character); 
     }
 }
-char* hexChars = "0123456789abcdef";
-void print_hex(uint64_t num) {
+static char* hexChars = "0123456789abcdef";
+void print_hex32(uint32_t num) {
     char buffer[32];
     buffer[31] = 0;
     int i = 30;
@@ -87,10 +86,10 @@ void print_hex(uint64_t num) {
         num/=16;
     } while(num != 0);
 
-    print_str(buffer + i + 1);
+    print_str32(buffer + i + 1);
 }
 
-void print_int(uint8_t num) {
+void print_int32(uint8_t num) {
     char buffer[32];
     buffer[31] = 0;
     int i = 30;
@@ -99,15 +98,15 @@ void print_int(uint8_t num) {
         num/=10;
     } while(num != 0);
 
-    print_str(buffer + i + 1);
+    print_str32(buffer + i + 1);
 
 }
 
-void print_set_color(uint8_t foreground, uint8_t background) {
+void print_set_color32(uint8_t foreground, uint8_t background) {
     color = foreground | (background << 4);
 }
 
-void delete_char() {
+void delete_char32() {
     struct Char empty = (struct Char) {
         character: ' ',
         color: color

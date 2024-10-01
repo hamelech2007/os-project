@@ -21,10 +21,10 @@ enum {
     PRINT_COLOR_WHITE = 15
 };
 
-void print_clear();
-void print_char(char character);
-void print_str(char* string);
-void print_int(uint8_t num);
-void print_hex(uint64_t num);
-void print_set_color(uint8_t foreground, uint8_t background);
-void delete_char();
+void print_clear32();
+void print_char32(char character);
+void print_str32(char* string);
+void print_int32(uint8_t num);
+void print_hex32(uint32_t num);
+void print_set_color32(uint8_t foreground, uint8_t background);
+void delete_char32();

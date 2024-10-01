@@ -1,23 +1,24 @@
 .global _start, gdt_flush, error
-.extern long_mode_start, initGdt, kernel_code_segment, entry_32
+.extern long_mode_start, initGdt, kernel_code_segment, entry_32, PML4T, PDPT, PDT, PT
 
-.section .text
+.section .boot
 .code32
 _start:
     leal stack_top, %esp
+    pushl %ebx
 
     call check_multiboot
     call check_cpuid
     call check_long_mode
 
-
+    call entry_32
     call setup_page_tables
     call enable_paging
 
 
 
     lgdt gdt64_pointer
-
+    popl %edi
     ljmp $gdt64_code_segment, $long_mode_start
     
     hlt
@@ -119,14 +120,17 @@ error:
 
 .section .bss
 .align 4096
-page_table_l4:
+.global page_table_l4, page_table_l3, page_table_l2, page_table_l1
+page_table_l4:  # PML4T
     .skip 4096
-page_table_l3:
+page_table_l3:  # PDPT
     .skip 4096
-page_table_l2:
+page_table_l2:  # PDT
+    .skip 4096  
+page_table_l1:  # PT
     .skip 4096
 stack_bottom:
-    .skip 4096*4
+    .skip 16384*4
 stack_top:
 
 .section .rodata

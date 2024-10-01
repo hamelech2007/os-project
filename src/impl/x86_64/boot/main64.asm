@@ -10,9 +10,8 @@ long_mode_start:
     movw %ax, %es
     movw %ax, %fs
     movw %ax, %gs
-
     call entry_64
-
+    
     hlt
 
 

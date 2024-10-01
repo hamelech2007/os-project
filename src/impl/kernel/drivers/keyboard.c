@@ -101,11 +101,17 @@ void keyboardHandler(uint8_t input) {
             break;
         default:
             if(!pressed) break;
-            if(capsLock || shiftPressed) {
+            if(shiftPressed) {
                 print_char(uppercase[scanCode]);
-            } else {
-                print_char(lowercase[scanCode]);
+                break;
             }
-            
+            if(capsLock) {
+                uint32_t chr = lowercase[scanCode];
+                if(chr >= 'a' && chr <= 'z') {
+                    print_char(uppercase[scanCode]);
+                } else print_char(chr);
+                break;
+            }
+            print_char(lowercase[scanCode]);
     }
 }

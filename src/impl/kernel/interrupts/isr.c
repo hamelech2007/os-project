@@ -3,6 +3,7 @@
 #include "stdio.h"
 #include "print.h"
 #include "keyboard.h"
+#include "mouse.h"
 
 void picEOI() {
     outPortB(0x20, 0x20);
@@ -84,7 +85,7 @@ void (*isr_routines[])(struct int_regs*) = {
 };
 void (*irq_routines[16])(struct int_regs*) = {
     timer, keyboard_press, unimplemented, unimplemented, unimplemented, unimplemented, unimplemented, unimplemented,
-    unimplemented, unimplemented, unimplemented, unimplemented, unimplemented, unimplemented, unimplemented, unimplemented
+    unimplemented, unimplemented, unimplemented, unimplemented, mouse_input, unimplemented, unimplemented, unimplemented
 };
 
 
@@ -156,4 +157,8 @@ void keyboard_press(struct int_regs* regs){
     print_str("Scancode: 0x");
     print_hex(scancode);
     print_char('\n');*/
+}
+
+void mouse_input(struct int_regs* regs){
+    sendMousePacket(inPortB(0x60));
 }

@@ -13,6 +13,11 @@
         "util.h": "c",
         "isr.h": "c",
         "stdarg.h": "c",
-        "keyboard.h": "c"
+        "keyboard.h": "c",
+        "mouse.h": "c",
+        "multiboot.h": "c",
+        "mmu.h": "c",
+        "print32.h": "c",
+        "mmu32.h": "c"
     }
 }
