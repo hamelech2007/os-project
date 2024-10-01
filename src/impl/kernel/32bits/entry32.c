@@ -8,6 +8,7 @@ extern void error();
 
 void entry_32(multiboot2_info_t* bootInfo) {
     initMMU();
+    print_hex32(bootInfo->header->bss_end_addr);
     //print_str32("Pages set up.\n");
     //for(;;);
 }

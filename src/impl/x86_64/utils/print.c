@@ -120,3 +120,7 @@ void delete_char() {
     } else col--;
     buffer[col + NUM_COLS * row] = empty;
 }
+
+char peek_char() {
+    return buffer[col + NUM_COLS * row].character;
+}

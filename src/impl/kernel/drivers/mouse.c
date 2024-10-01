@@ -1,5 +1,6 @@
 #include "mouse.h"
 #include "print.h"
+#include "util.h"
 
 void initializePS2Mouse() {
     uint8_t input, ack;
@@ -59,22 +60,23 @@ void sendMousePacket(uint8_t packet) {
 }
 
 void mouseUpdate() {
-    print_str("Mouse Event\n");
-    /*uint8_t status = mouseInput[0];
+    uint8_t status = mouseInput[0];
     int8_t x = mouseInput[1];
     int8_t y = mouseInput[2];
 
     bool leftClick = status & 0x01;
     bool rightClick = status & 0x02;
     bool middleClick = status & 0x04;
-
-    print_str("Status: ");
-    print_hex(status);
-    print_str(" X: ");
-    print_hex(x);
-    print_str(" Y: ");
-    print_hex(y);
-    print_char('\n');*/
     
+    if(status == 0x8) return;
+    if(peek_char() != ' ') print_char('\n');
+    print_str("Mouse Event! ");
+    print_str("Status: 0x");
+    print_hex(status);
+    print_str(" X: 0x");
+    print_hex(x);
+    print_str(" Y: 0x");
+    print_hex(y);
+    print_char('\n');
     // todo, handle mouse click
 }

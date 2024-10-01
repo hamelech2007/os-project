@@ -62,4 +62,4 @@ struct pt_entry {
     uint64_t execute_disable : 1; // Execute Disable bit: 1 = disable execution
 } __attribute__((packed));
 
-uint64_t virt2phys(uint64_t virt_addr);
+void initMMU();

@@ -33,7 +33,7 @@ void setup_identity_mapping() {
 
         // Initialize PT entries for identity mapping
         for (uint32_t j = 0; j < 512; j++) {
-            uint32_t page_address = (i * 0x1000) + (j * 0x1000); // Calculate page address
+            uint32_t page_address = (j * 0x1000); // Calculate page address
             PT[j].present = 1;
             PT[j].rw = 1; // Read/Write
             PT[j].user = 1; // User/Supervisor

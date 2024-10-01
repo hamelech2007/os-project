@@ -1,5 +1,5 @@
-.global _start, gdt_flush, error
-.extern long_mode_start, initGdt, kernel_code_segment, entry_32, PML4T, PDPT, PDT, PT
+.global _start, error
+.extern long_mode_start, entry_32, PML4T
 
 .section .boot
 .code32
@@ -11,8 +11,7 @@ _start:
     call check_cpuid
     call check_long_mode
 
-    call entry_32
-    call setup_page_tables
+    call entry_32 // setup page tables
     call enable_paging
 
 
@@ -67,31 +66,9 @@ check_long_mode:
     movb $'L', %al
     jmp error
 
-setup_page_tables:
-    leal page_table_l3, %eax
-    orl $0b11, %eax # present, writable flags
-    movl %eax, page_table_l4
-
-    leal page_table_l2, %eax
-    orl $0b11, %eax # present, writable flags
-    movl %eax, page_table_l3
-
-    movl $0, %ecx
-.loop:
-
-    movl $0x200000, %eax
-    mul %ecx
-    orl $0b10000011, %eax # present, writable flags, huge page
-    movl %eax, page_table_l2(,%ecx, 8)
-
-    incl %ecx
-    cmpl $512, %ecx
-    jne .loop
-
-    ret
 
 enable_paging:
-    leal page_table_l4, %eax
+    leal PML4T, %eax
     movl %eax, %cr3
 
     movl %cr4, %eax
@@ -120,15 +97,6 @@ error:
 
 .section .bss
 .align 4096
-.global page_table_l4, page_table_l3, page_table_l2, page_table_l1
-page_table_l4:  # PML4T
-    .skip 4096
-page_table_l3:  # PDPT
-    .skip 4096
-page_table_l2:  # PDT
-    .skip 4096  
-page_table_l1:  # PT
-    .skip 4096
 stack_bottom:
     .skip 16384*4
 stack_top:
