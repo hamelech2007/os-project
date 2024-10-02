@@ -7,7 +7,10 @@ uint64_t startup_timer = 0;
 void kernel_main() {
     // print_clear();
     print_set_color(PRINT_COLOR_LIGHT_BLUE, PRINT_COLOR_BLACK);
-    print_str("Hello, World from Kernel!\n");
+    print_str("Welcome to os!\n");
+    print_str("command: ");
+    disable_deletion();
+    
     //int i = 0/0;
     for(;;) ;
 }

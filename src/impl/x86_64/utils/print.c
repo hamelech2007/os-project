@@ -5,6 +5,11 @@
 const static size_t NUM_COLS = 80;
 const static size_t NUM_ROWS = 25;
 
+struct vgaPoint {
+    uint8_t row, col;
+};
+struct vgaPoint deletePoint = {0, 0};
+
 struct Char {
     uint8_t character;
     uint8_t color;
@@ -108,6 +113,7 @@ void print_set_color(uint8_t foreground, uint8_t background) {
 }
 
 void delete_char() {
+    if(col <= deletePoint.col && row <= deletePoint.row) return;
     struct Char empty = (struct Char) {
         character: ' ',
         color: color
@@ -123,4 +129,15 @@ void delete_char() {
 
 char peek_char() {
     return buffer[col + NUM_COLS * row].character;
+}
+
+void disable_deletion() {
+    deletePoint = (struct vgaPoint) {row, col};
+}
+void enable_deletion() {
+    deletePoint = (struct vgaPoint) {0, 0};
+}
+
+void print_prefix() {
+    print_str("command: ");
 }

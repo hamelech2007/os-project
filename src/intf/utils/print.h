@@ -29,3 +29,6 @@ void print_hex(uint64_t num);
 void print_set_color(uint8_t foreground, uint8_t background);
 void delete_char();
 char peek_char();
+void disable_deletion();
+void enable_deletion();
+void print_prefix();

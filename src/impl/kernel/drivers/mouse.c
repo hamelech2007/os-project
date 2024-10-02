@@ -60,7 +60,7 @@ void sendMousePacket(uint8_t packet) {
 }
 
 void mouseUpdate() {
-    uint8_t status = mouseInput[0];
+    /*uint8_t status = mouseInput[0];
     int8_t x = mouseInput[1];
     int8_t y = mouseInput[2];
 
@@ -77,6 +77,6 @@ void mouseUpdate() {
     print_hex(x);
     print_str(" Y: 0x");
     print_hex(y);
-    print_char('\n');
+    print_char('\n');*/
     // todo, handle mouse click
 }

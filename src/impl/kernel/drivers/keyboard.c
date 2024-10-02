@@ -99,6 +99,13 @@ void keyboardHandler(uint8_t input) {
         case 14:
             if(pressed) delete_char();
             break;
+        case 28:
+            // enter
+            if(!pressed) break;
+            print_char('\n');
+            print_prefix();
+            disable_deletion();
+            break;
         default:
             if(!pressed) break;
             if(shiftPressed) {
