@@ -117,12 +117,23 @@ void divide_by_zero(struct int_regs* regs) {
 
 void invalid_opcode(struct int_regs* regs) {
     print_set_color(PRINT_COLOR_WHITE, PRINT_COLOR_RED);
-    print_str("Invalid opcode recieved!\n");
+    print_str("Invalid opcode recieved at address: 0x");
+    print_hex(regs->rip);
+    print_str("\n4 bytes following RIP: 0x");
+    print_hex(*(uint8_t*)regs->rip);
+    print_str(" 0x");
+    print_hex(*(uint8_t*)(regs->rip + 1));
+    print_str(" 0x");
+    print_hex(*(uint8_t*)(regs->rip + 2));
+    print_str(" 0x");
+    print_hex(*(uint8_t*)(regs->rip + 3));
+    for(;;);
 }
 
 void general_protection(struct int_regs* regs) {
-    print_str("General Protection Fault! Error code: \n");
+    print_str("General Protection Fault! Error code: ");
     print_int(regs->err_code);
+    print_char('\n');
 }
 
 void reserved(struct int_regs* regs) {

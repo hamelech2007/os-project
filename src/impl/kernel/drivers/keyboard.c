@@ -102,7 +102,7 @@ void keyboardHandler(uint8_t input) {
         case 28:
             // enter
             if(!pressed) break;
-            print_char('\n');
+            parse_command();
             print_prefix();
             disable_deletion();
             break;

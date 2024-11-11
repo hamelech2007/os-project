@@ -1,9 +1,12 @@
 #include "print.h"
 #include "stdio.h"
+#include "string.h"
+#include "memory.h"
 #include <stddef.h>
 
 const static size_t NUM_COLS = 80;
 const static size_t NUM_ROWS = 25;
+const static size_t PREFIX_LEN = 9;
 
 struct vgaPoint {
     uint8_t row, col;
@@ -19,6 +22,44 @@ struct Char* buffer = (struct Char*) 0xb8000;
 size_t col = 0;
 size_t row = 0;
 uint8_t color = PRINT_COLOR_WHITE | (PRINT_COLOR_BLACK << 4);
+
+const static char* commands[] = {"uptime", 0};
+
+extern uint64_t startup_timer;
+void parse_command() {
+    struct Char* commandLine = buffer + row*NUM_COLS + PREFIX_LEN;
+    char** currCommands = commands;
+    while(*currCommands) {
+        // todo fix
+        char* command = *currCommands;
+        uint16_t index = 0;
+        while(*(command + index)){
+            if(index + PREFIX_LEN >= col) break;
+            if(*(command + index) == (commandLine + index)->character) {
+                index++;
+            } else break;
+        }
+        if(index == strlen(command) && (commandLine + index)->character == ' ') {
+            // command found
+            if(strcmp(command, "uptime")) {
+                uint64_t uptime = startup_timer*59.9;
+                print_char('\n');
+                print_str("The OS has been up for ");
+                print_int((uptime/1000)/60/60 % 60);
+                print_str(" hours, ");
+                print_int((uptime/1000)/60 % 60);
+                print_str(" minutes and ");
+                print_int((uptime/1000) % 60);
+                print_str(" seconds!\n");
+                return;
+            }
+            return;
+        }
+        currCommands++;
+    }
+    print_char('\n');
+    print_str("Command not found!\n");
+}
 
 void clear_row(size_t row) {
     struct Char empty = (struct Char) {
@@ -40,13 +81,13 @@ void print_newline() {
         return;
     }
 
-    for(size_t row = 1; row < NUM_ROWS; row++) {
-        for(size_t col = 0; col < NUM_COLS; col++) {
-            struct Char character = buffer[col + NUM_COLS * row];
-            buffer[col + NUM_COLS * (row - 1)] = character;
+    for(size_t row_i = 1; row_i < NUM_ROWS; row_i++) {
+        for(size_t col_i = 0; col_i < NUM_COLS; col_i++) {
+            struct Char character = buffer[col_i + NUM_COLS * row_i];
+            buffer[col_i + NUM_COLS * (row_i - 1)] = character;
         }
     }
-    clear_row(NUM_COLS - 1);
+    clear_row(NUM_ROWS - 1);
 }
 
 void print_clear() {
@@ -95,7 +136,7 @@ void print_hex(uint64_t num) {
     print_str(buffer + i + 1);
 }
 
-void print_int(uint8_t num) {
+void print_int(uint64_t num) {
     char buffer[32];
     buffer[31] = 0;
     int i = 30;
