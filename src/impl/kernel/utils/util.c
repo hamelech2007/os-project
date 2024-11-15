@@ -1,4 +1,12 @@
 #include "util.h"
+#include "print.h"
+
+
+void panic() {
+    print_set_color(PRINT_COLOR_WHITE, PRINT_COLOR_RED);
+    print_str("\n------------------------------------------\nKERNEL PANIC\n------------------------------------------");
+    for(;;);
+}
 
 void outPortB(uint16_t port, uint8_t value) {
     asm volatile ("outb %1, %0" : : "dN" (port), "a" (value));

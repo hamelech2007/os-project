@@ -5,7 +5,6 @@
 #include "util.h"
 #include "drivers.h"
 #include "multiboot.h"
-#include "mmu32.h"
 
 extern void error();
 extern void kernel_main();

@@ -1,5 +1,11 @@
 .global long_mode_start, long_jump_new_gdt
 .extern entry_64, error, kernel_main
+
+.section .bss
+stack_bottom:
+    .skip 16384*4
+stack_top:
+
 .section .text
 .code64
 long_mode_start:
@@ -10,8 +16,14 @@ long_mode_start:
     movw %ax, %es
     movw %ax, %fs
     movw %ax, %gs
+
+    movq %rsp, %rax
+    leaq stack_top, %rsp
+    pushq %rax
+
     call entry_64
     
+    popq %rsp
     hlt
 
 

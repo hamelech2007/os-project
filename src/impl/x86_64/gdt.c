@@ -1,5 +1,5 @@
 #include "gdt.h"
-#include "memory.h"
+#include "memory_utils.h"
 #include "print.h"
 
 extern void error();

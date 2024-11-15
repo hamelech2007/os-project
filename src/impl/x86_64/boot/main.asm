@@ -1,26 +1,29 @@
-.global _start, error
+.global _start, error, page_table_l4
 .extern long_mode_start, entry_32, PML4T
 
 .section .boot
 .code32
 _start:
-    leal stack_top, %esp
+    leal stack_top_boot, %esp
     pushl %ebx
 
     call check_multiboot
     call check_cpuid
     call check_long_mode
 
-    call entry_32 // setup page tables
+    call setup_page_tables
+tst5:
     call enable_paging
 
 
-
+tst4:
     lgdt gdt64_pointer
     popl %edi
-    ljmp $gdt64_code_segment, $long_mode_start
+    ljmp $gdt64_code_segment, $enter_64
     
     hlt
+
+
 
 check_multiboot:
     cmpl $0x36d76289, %eax
@@ -66,9 +69,46 @@ check_long_mode:
     movb $'L', %al
     jmp error
 
+setup_page_tables:
+    leal page_table_l3, %eax
+    orl $0b11, %eax # present, writable flags
+    movl %eax, page_table_l4
 
+    leal page_table_l3_higher, %eax
+    orl $0b11, %eax # present, writable flags
+    movl %eax, page_table_l4+4088
+
+    leal page_table_l2, %eax
+    orl $0b11, %eax # present, writable flags
+    movl %eax, page_table_l3
+
+    leal page_table_l2_higher, %eax
+    orl $0b11, %eax # present, writable flags
+    movl %eax, page_table_l3_higher+4080
+
+    movl $0, %ecx
+.loop:
+    movl $0x200000, %eax
+    mul %ecx
+    orl $0b10000011, %eax # present, writable flags, huge page
+    movl %eax, page_table_l2(,%ecx, 8)
+    incl %ecx
+    cmpl $512, %ecx
+    jne .loop
+
+    movl $0, %ecx
+.loop2:
+    movl $0x200000, %eax
+    mul %ecx
+    orl $0b10000011, %eax # present, writable flags, huge page
+    movl %eax, page_table_l2_higher(,%ecx, 8)
+    incl %ecx
+    cmpl $512, %ecx
+    jne .loop2
+
+    ret
 enable_paging:
-    leal PML4T, %eax
+    leal page_table_l4, %eax
     movl %eax, %cr3
 
     movl %cr4, %eax
@@ -95,13 +135,22 @@ error:
 
 
 
-.section .bss
+.section .protected_memory
 .align 4096
-stack_bottom:
-    .skip 16384*4
-stack_top:
+page_table_l4:
+    .skip 4096
+page_table_l3:
+    .skip 4096
+page_table_l3_higher:
+    .skip 4096
+page_table_l2:
+    .skip 4096
+page_table_l2_higher:
+    .skip 4096
+stack_bottom_boot:
+    .skip 4096
+stack_top_boot:
 
-.section .rodata
 gdt64:
     .quad 0
 .equ gdt64_code_segment, . - gdt64
@@ -111,4 +160,9 @@ gdt64_pointer:
     .short . - gdt64 - 1
     .quad gdt64
 
-
+.section .boot
+.code64
+enter_64:
+    movabs $long_mode_start, %rax
+tst65:
+    jmp *%rax

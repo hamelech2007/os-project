@@ -1,5 +1,8 @@
 #pragma once
 #include "stdint.h"
+#include "multiboot.h"
+
+#define KERNEL_OFFSET 0xffffffff80000000;
 
 struct pml4_entry {
     uint64_t present      : 1;  // Present bit: must be 1 for valid entry
@@ -62,4 +65,5 @@ struct pt_entry {
     uint64_t execute_disable : 1; // Execute Disable bit: 1 = disable execution
 } __attribute__((packed));
 
-void initMMU();
+void initMemory(struct multiboot_mmap_entry[], uint32_t entry_size, uint32_t entry_count);
+void invalidate(uint64_t vaddr);
