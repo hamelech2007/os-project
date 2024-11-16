@@ -1,5 +1,5 @@
 .global _start, error, page_table_l4
-.extern long_mode_start, entry_32, PML4T
+.extern long_mode_start
 
 .section .boot
 .code32
@@ -76,7 +76,7 @@ setup_page_tables:
 
     leal page_table_l3_higher, %eax
     orl $0b11, %eax # present, writable flags
-    movl %eax, page_table_l4+4088
+    movl %eax, page_table_l4+4088 # pml4[511]
 
     leal page_table_l2, %eax
     orl $0b11, %eax # present, writable flags
@@ -84,7 +84,7 @@ setup_page_tables:
 
     leal page_table_l2_higher, %eax
     orl $0b11, %eax # present, writable flags
-    movl %eax, page_table_l3_higher+4080
+    movl %eax, page_table_l3_higher+4080 # pdpt[510]
 
     movl $0, %ecx
 .loop:

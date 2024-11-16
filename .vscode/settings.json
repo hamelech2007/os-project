@@ -19,6 +19,8 @@
         "mmu.h": "c",
         "print32.h": "c",
         "mmu32.h": "c",
-        "string.h": "c"
+        "string.h": "c",
+        "drivers.h": "c",
+        "memory_utils.h": "c"
     }
 }

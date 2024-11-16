@@ -6,23 +6,31 @@
 
 
 extern struct pml4_entry* page_table_l4;
+extern struct KernelBootData kernel_boot_data;
+extern uint64_t _kernel_start, _kernel_end;
 
-void initMemory(struct multiboot_mmap_entry entries[], uint32_t entry_size, uint32_t entry_count){
-    for(uint32_t i = 0; i < entry_count; i++){
-        struct multiboot_mmap_entry* entry = entries + i;
-        print_str("Found entry! addr: 0x");
-        print_hex(entry->base_addr);
-        print_str(", length: 0x");
-        print_hex(entry->length);
-        print_str(", type: ");
-        print_int(entry->type);
-        print_char('\n');
+void init_memory(){
+    struct MultibootMmapEntry *entry;
+
+    for(uint16_t i = 0; entry = get_memory_area_from_multiboot(i); i++){
+        if(entry->type != MULTIBOOT2_MEMORY_AVAILABLE) continue;
+
+        for(uint64_t p = entry->base_addr; p < entry->base_addr + entry->length; p += PAGE_SIZE){
+            if(p >= V2P(&_kernel_start) && p < V2P(&_kernel_end)) continue;
+            if(multiboot_page_used(p)) continue;
+
+            uint64_t vaddr = P2V(p);
+            uint64_t page = vmm_get_page(page_table_l4, vaddr);
+
+            if(!(page & PAGE_PRESENT)){
+                // todo set flags global and write in vmm
+            }
+
+            pmm_free(page);
+        }
     }
 
-    memset(page_table_l4, 0, 8);
-    for(uint16_t i = 0; i < 512; i++) {
-        invalidate(i * 0x200000);
-    }
+    
 }
 
 void invalidate(uint64_t vaddr) {

@@ -1,0 +1,8 @@
+megs: 128
+romimage: file=/usr/share/bochs/BIOS-bochs-legacy
+vgaromimage: file=/usr/share/bochs/VGABIOS-lgpl-latest
+ata0-master: type=cdrom, path=dist/x86_64/kernel.iso, status=inserted
+boot: cdrom
+mouse: enabled=0
+plugin_ctrl: speaker=0
+display_library: sdl2, options="gui_debug"

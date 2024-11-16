@@ -2,3 +2,5 @@ notes.txt
 build/*
 dist/*
 .vscode/*
+bx_enh_dbg.ini
+virtual_disk.qcow2

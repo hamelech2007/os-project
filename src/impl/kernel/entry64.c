@@ -9,12 +9,28 @@
 extern void error();
 extern void kernel_main();
 
+struct KernelBootData kernel_boot_data;
+
 void enable_floating_point();
 
-void entry_64(volatile uint64_t bootInfo) {
-    //asm volatile ("mov %%rdi, %1" : "+m"(bootInfo) : :); // for some reason, even though bootInfo should already be rdi, it isnt...
+void entry_64(uint64_t boot_info_addr) {
 
-    handle_tags(bootInfo);
+    parse_tags(boot_info_addr);
+    init_memory();
+
+    for(uint8_t i = 0; i < kernel_boot_data.mmap_len; i++){
+        struct MultibootMmapEntry *entry = get_memory_area_from_multiboot(i);
+
+        if(entry->type != MULTIBOOT2_MEMORY_AVAILABLE) continue;
+
+        print_str("Found entry! addr: 0x");
+        print_hex(entry->base_addr);
+        print_str(", length: 0x");
+        print_hex(entry->length);
+        print_str(", type: ");
+        print_int(entry->type);
+        print_char('\n');
+    }
 
     initGdt(); // initialize global descriptor table
     initIdt(); // initialize interrupt descriptor table

@@ -2,78 +2,49 @@
 #include "util.h"
 #include "print.h"
 #include "memory.h"
+#include "stdint.h"
+#include "string.h"
 
-void handle_tags(uint64_t boot_info_addr) {
-    // information for initializing memory management:
-    uint64_t entries;
-    uint32_t entry_size;
-    uint32_t entry_count;
-    uint32_t mem_upper;
-    uint32_t mods_addr;
 
-    uint32_t total_size = *(uint32_t*)boot_info_addr;
-    boot_info_addr+=8; // skip size and reserved
-    boot_info_addr+=(8-boot_info_addr%8)%8; // align to 8
-    uint32_t tag_type, tag_size;
-    while(!(((tag_type = *(uint32_t*)boot_info_addr) == 0) & ((tag_size = *(uint32_t*)(boot_info_addr+4)) == 8))) { // we use bitwise to prevent short circuit evaluation
-        switch (tag_type)
-        {
-        case 2: // boot loader name tag
-            print_str("Boot loader name from boot info: ");
-            print_str(boot_info_addr + 8);
-            print_char('\n');
-            break;
-        case 4: // Basic memory information
-            print_str("mem_lower: 0x");
-            print_hex(*(uint32_t*)(boot_info_addr + 8));
-            print_str(", mem_upper: 0x");
-            print_hex(*(uint32_t*)(boot_info_addr + 12));
-            print_char('\n');
-            mem_upper = *(uint32_t*)(boot_info_addr + 12);
-            break;
-        case 5: // BIOS Boot device
-            print_str("biosdev: 0x");
-            print_hex(*(uint32_t*)(boot_info_addr + 8));
-            print_str(", partition: 0x");
-            print_hex(*(uint32_t*)(boot_info_addr + 12));
-            print_str(", sub_partition: 0x");
-            print_hex(*(uint32_t*)(boot_info_addr + 16));
-            print_char('\n');
-            break;
-        case 6: // Memory map
-            entries = boot_info_addr + 16;
-            entry_size = *(uint32_t*)(boot_info_addr + 8);
-            entry_count = (tag_size - 16)/entry_size;
-            uint32_t entry_version = *(uint32_t*)(boot_info_addr + 12);
-            if(entry_version != 0 || entry_size != 24) panic();
-            break;
-            
-        case 8: // Framebuffer info
-            print_str("address: 0x");
-            print_hex(*(uint64_t*)(boot_info_addr + 8));
-            print_str(", pitch: 0x");
-            print_hex(*(uint32_t*)(boot_info_addr + 16));
-            print_str(", width: 0x");
-            print_hex(*(uint32_t*)(boot_info_addr + 20));
-            print_str(", height: 0x");
-            print_hex(*(uint32_t*)(boot_info_addr + 24));
-            print_str(", bpp: 0x");
-            print_hex(*(uint8_t*)(boot_info_addr + 28));
-            print_str(", type: 0x");
-            print_hex(*(uint8_t*)(boot_info_addr + 29));
-            print_str(", color_info: 0x");
-            print_hex(*(uint8_t*)(boot_info_addr + 31));
-            print_char('\n');
-        default:
-            print_str("Found tag: ");
-            print_int(tag_type);
-            print_str(" of size: ");
-            print_int(tag_size);
-            print_str(" bytes!\n");
-            break;
+extern struct KernelBootData kernel_boot_data;
+
+void parse_tags(struct MultibootTaglist* tag_list) {
+
+    struct MultibootTag* tag = ((uint8_t*) tag_list) + sizeof(struct MultibootTaglist);
+
+    while(tag->type){
+        switch(tag->type){
+            case MULTIBOOT_BOOTLOADER_NAME:
+                kernel_boot_data.bootloader = tag->data;
+                break;
+            case MULTIBOOT_COMMANDLINE:
+                kernel_boot_data.commandline = tag->data;
+                break;
+            case MULTIBOOT_MMAP:
+                kernel_boot_data.mmap = tag->data;
+                kernel_boot_data.mmap_len = (tag->size - 8)/kernel_boot_data.mmap->entry_size;
+                kernel_boot_data.mmap_size = tag->size - 8;
+                break;
         }
-        boot_info_addr+=tag_size;
-        boot_info_addr+= (8-boot_info_addr%8)%8; // align to 8
+
+        tag = ((uint8_t*) tag)+(tag->size + ((tag->size % 8)?(8-(tag->size%8)):0));
     }
-    initMemory(entries, entry_size, entry_count);
+
+}
+
+struct MultibootMmapEntry* get_memory_area_from_multiboot(uint8_t index){
+
+    if(index >= kernel_boot_data.mmap_len) return 0;
+
+    return &kernel_boot_data.mmap->entries[index];
+
+}
+
+bool multiboot_page_used(uint64_t start_addr){
+    if(
+        ((kernel_boot_data.bootloader < start_addr + PAGE_SIZE) && (start_addr <= kernel_boot_data.bootloader + strlen(kernel_boot_data.bootloader))) ||
+        ((kernel_boot_data.commandline < start_addr + PAGE_SIZE) && (start_addr <= kernel_boot_data.commandline + strlen(kernel_boot_data.commandline))) ||
+        ((kernel_boot_data.mmap < start_addr + PAGE_SIZE) && (start_addr <= kernel_boot_data.mmap + kernel_boot_data.mmap_size))
+    ) return true;
+    return false;
 }

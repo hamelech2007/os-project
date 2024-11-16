@@ -154,20 +154,6 @@ void timer(struct int_regs* regs) {
 
 void keyboard_press(struct int_regs* regs){
     keyboardHandler(inPortB(0x60));
-    /*// use different colors each time to see easily
-    static uint8_t color = PRINT_COLOR_LIGHT_RED;
-    color++;
-    color%=16;
-    if(color == 0) color++;
-    print_set_color(color, PRINT_COLOR_BLACK);
-    // color end
-    print_str("Key pressed!\n");
-
-    uint8_t scancode = inPortB(0x60);
-    
-    print_str("Scancode: 0x");
-    print_hex(scancode);
-    print_char('\n');*/
 }
 
 void mouse_input(struct int_regs* regs){
