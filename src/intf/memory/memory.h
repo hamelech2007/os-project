@@ -11,6 +11,9 @@
 #define PAGE_HUGE         0x080
 #define PAGE_GLOBAL       0x100
 
+#define FLAGS_MASK (PAGE_SIZE - 1)
+#define MASK_FLAGS(addr) ((uint64_t)addr & ~FLAGS_MASK)
+
 struct pml4_entry {
     uint64_t present      : 1;  // Present bit: must be 1 for valid entry
     uint64_t rw           : 1;  // Read/Write: 0 = read-only, 1 = read/write
@@ -81,5 +84,12 @@ uint64_t P2V(uint64_t phaddr);
 
 uint64_t vmm_get_page(uint64_t pml4, uint64_t vaddr);
 bool vmm_page_exists(uint64_t page_start);
+void vmm_clear_page(uint64_t pml4, uint64_t addr, bool free);
+bool vmm_page_exists(uint64_t page_start);
 
 void pmm_free(uint64_t page_start);
+uint64_t pmm_alloc();
+uint64_t pmm_calloc();
+
+void* kalloc_page();
+void kfree_page(void* page_start);

@@ -5,6 +5,7 @@
 #include "util.h"
 #include "drivers.h"
 #include "multiboot.h"
+#include "memory.h"
 
 extern void error();
 extern void kernel_main();
@@ -18,19 +19,6 @@ void entry_64(uint64_t boot_info_addr) {
     parse_tags(boot_info_addr);
     init_memory();
 
-    for(uint8_t i = 0; i < kernel_boot_data.mmap_len; i++){
-        struct MultibootMmapEntry *entry = get_memory_area_from_multiboot(i);
-
-        if(entry->type != MULTIBOOT2_MEMORY_AVAILABLE) continue;
-
-        print_str("Found entry! addr: 0x");
-        print_hex(entry->base_addr);
-        print_str(", length: 0x");
-        print_hex(entry->length);
-        print_str(", type: ");
-        print_int(entry->type);
-        print_char('\n');
-    }
 
     initGdt(); // initialize global descriptor table
     initIdt(); // initialize interrupt descriptor table

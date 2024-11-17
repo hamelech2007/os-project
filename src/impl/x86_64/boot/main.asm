@@ -1,4 +1,4 @@
-.global _start, error, page_table_l4
+.global _start, error, page_table_l4, page_table_l3, page_table_l2, page_table_l1, page_table_l3_higher, page_table_l2_higher, page_table_l1_higher
 .extern long_mode_start
 
 .section .boot
@@ -86,22 +86,30 @@ setup_page_tables:
     orl $0b11, %eax # present, writable flags
     movl %eax, page_table_l3_higher+4080 # pdpt[510]
 
+    leal page_table_l1, %eax
+    orl $0b11, %eax
+    movl %eax, page_table_l2
+
+    leal page_table_l1_higher, %eax
+    orl $0b11, %eax
+    movl %eax, page_table_l2_higher
+
     movl $0, %ecx
 .loop:
-    movl $0x200000, %eax
+    movl $0x1000, %eax
     mul %ecx
-    orl $0b10000011, %eax # present, writable flags, huge page
-    movl %eax, page_table_l2(,%ecx, 8)
+    orl $0b11, %eax # present, writable flags
+    movl %eax, page_table_l1(,%ecx, 8)
     incl %ecx
     cmpl $512, %ecx
     jne .loop
 
     movl $0, %ecx
 .loop2:
-    movl $0x200000, %eax
+    movl $0x1000, %eax
     mul %ecx
-    orl $0b10000011, %eax # present, writable flags, huge page
-    movl %eax, page_table_l2_higher(,%ecx, 8)
+    orl $0b11, %eax # present, writable flags
+    movl %eax, page_table_l1_higher(,%ecx, 8)
     incl %ecx
     cmpl $512, %ecx
     jne .loop2
@@ -146,6 +154,10 @@ page_table_l3_higher:
 page_table_l2:
     .skip 4096
 page_table_l2_higher:
+    .skip 4096
+page_table_l1:
+    .skip 4096
+page_table_l1_higher:
     .skip 4096
 stack_bottom_boot:
     .skip 4096
