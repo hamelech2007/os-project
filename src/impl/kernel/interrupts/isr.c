@@ -5,13 +5,13 @@
 #include "keyboard.h"
 #include "mouse.h"
 
-void picEOI() {
-    outPortB(0x20, 0x20);
+void pic_EOI() {
+    out_port_b(0x20, 0x20);
 }
 
-void slavePicEOI() {
-    outPortB(0xa0, 0x20);
-    picEOI();
+void slave_pic_EOI() {
+    out_port_b(0xa0, 0x20);
+    pic_EOI();
 }
 
 char* interrupt_messages[] = {
@@ -97,9 +97,9 @@ void irq_handler(struct int_regs* regs) {
     irq_routines[regs->int_num - 32](regs); // starts at 32
 
     if(regs->int_num >= 40) 
-        slavePicEOI();
+        slave_pic_EOI();
     else
-        picEOI();
+        pic_EOI();
 }
 
 void unimplemented(struct int_regs* regs) {
@@ -112,7 +112,7 @@ void unimplemented(struct int_regs* regs) {
 void divide_by_zero(struct int_regs* regs) {
     print_set_color(PRINT_COLOR_RED, PRINT_COLOR_WHITE);
     print_str("Divide by zero recieved!\n");
-    regs->rip++;
+    panic();
 }
 
 void invalid_opcode(struct int_regs* regs) {
@@ -153,9 +153,9 @@ void timer(struct int_regs* regs) {
 }
 
 void keyboard_press(struct int_regs* regs){
-    keyboardHandler(inPortB(0x60));
+    handle_keyboard_input(in_port_b(0x60));
 }
 
 void mouse_input(struct int_regs* regs){
-    sendMousePacket(inPortB(0x60));
+    send_mouse_packet(in_port_b(0x60));
 }

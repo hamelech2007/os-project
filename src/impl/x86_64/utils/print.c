@@ -23,7 +23,7 @@ size_t col = 0;
 size_t row = 0;
 uint8_t color = PRINT_COLOR_WHITE | (PRINT_COLOR_BLACK << 4);
 
-const static char* commands[] = {"uptime", 0};
+static char* commands[] = {"uptime", 0};
 
 extern uint64_t startup_timer;
 void parse_command() {

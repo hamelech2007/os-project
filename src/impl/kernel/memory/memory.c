@@ -5,7 +5,7 @@
 #include "print.h"
 
 
-extern struct uint8_t page_table_l4, page_table_l3, page_table_l2, page_table_l1, page_table_l3_higher, page_table_l2_higher, page_table_l1_higher;
+extern uint8_t page_table_l4, page_table_l3, page_table_l2, page_table_l1, page_table_l3_higher, page_table_l2_higher, page_table_l1_higher; // page tables defined in main.asm for boot and kernel
 extern struct KernelBootData kernel_boot_data;
 extern uint64_t _kernel_start, _kernel_end;
 
@@ -44,10 +44,21 @@ void invalidate(uint64_t vaddr) {
     asm volatile ("invlpg %0" :: "m"(vaddr));
 }
 
+
 void* kalloc_page() {
-    return P2V(pmm_calloc());
+    uint64_t phaddr = pmm_calloc();
+    uint64_t vaddr = P2V(phaddr);
+    uint64_t page = vmm_get_page(&page_table_l4,vaddr);
+    if(!(page & PAGE_PRESENT) || !vmm_page_exists(page)){
+        uint16_t flags = PAGE_GLOBAL | PAGE_WRITE;
+        vmm_set_page(&page_table_l4, vaddr, phaddr, flags | PAGE_PRESENT);
+        invalidate(vaddr);
+    }
+    return vaddr;
 }
 
 void kfree_page(void* page_start) {
-    pmm_free(V2P(page_start));
+    uint64_t phaddr = V2P(page_start);
+    vmm_clear_page(&page_table_l4, page_start, false);
+    pmm_free(phaddr);
 }

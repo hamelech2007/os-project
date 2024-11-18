@@ -1,4 +1,4 @@
 #pragma once
 #include "stdint.h"
 
-void keyboardHandler(uint8_t input);
+void handle_keyboard_input(uint8_t input);

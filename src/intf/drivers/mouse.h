@@ -1,6 +1,6 @@
 #pragma once
 #include "stdint.h"
 
-void initializePS2Mouse();
-void sendMousePacket(uint8_t packet);
-void mouseUpdate();
+void initialize_PS2_mouse();
+void send_mouse_packet(uint8_t packet);
+void mouse_update();

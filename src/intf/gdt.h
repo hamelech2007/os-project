@@ -37,7 +37,7 @@ struct Tss64
     uint16_t iomap;
 
 } __attribute__((packed));
-void initGdt();
-void setGdtGate(uint32_t num, uint32_t base, uint32_t limit, uint8_t access, uint8_t gran);
-void setTssEntry(uint32_t num);
-void loadTss(uint16_t tss_selector);
+void init_gdt();
+void set_gdt_gate(uint32_t num, uint32_t base, uint32_t limit, uint8_t access, uint8_t gran);
+void set_tss_entry(uint32_t num);
+void load_tss(uint16_t tss_selector);

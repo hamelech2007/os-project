@@ -2,6 +2,6 @@
 #include "stdint.h"
 
 void panic();
-void outPortB(uint16_t port, uint8_t value);
+void out_port_b(uint16_t port, uint8_t value);
 
-uint8_t inPortB(uint16_t port);
+uint8_t in_port_b(uint16_t port);

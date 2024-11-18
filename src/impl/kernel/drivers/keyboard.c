@@ -64,7 +64,7 @@ UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN
 };
 
 
-void keyboardHandler(uint8_t input) {
+void handle_keyboard_input(uint8_t input) {
     uint8_t scanCode = input & 0x7f;
     bool pressed = !(input & 0x80);
 

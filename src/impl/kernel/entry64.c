@@ -14,15 +14,14 @@ struct KernelBootData kernel_boot_data;
 
 void enable_floating_point();
 
-void entry_64(uint64_t boot_info_addr) {
+void entry_64(struct MultibootTaglist* boot_info_addr) {
 
     parse_tags(boot_info_addr);
     init_memory();
 
-
-    initGdt(); // initialize global descriptor table
-    initIdt(); // initialize interrupt descriptor table
-    initializeDrivers(); // initialize drivers
+    init_gdt(); // initialize global descriptor table
+    init_idt(); // initialize interrupt descriptor table
+    initialize_drivers(); // initialize drivers
 
 
     enable_floating_point();

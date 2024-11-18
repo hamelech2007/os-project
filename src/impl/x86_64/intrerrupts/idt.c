@@ -1,29 +1,29 @@
 #include "idt.h"
-#include "memory.h"
+#include "memory_utils.h"
 #include "util.h"
 
 struct idt_entry idt[256];
 struct idt_ptr idt_pointer;
 
 
-void setupPic() {
-    outPortB(0x20, 0x11);
-    outPortB(0xA0, 0x11);
+static void setup_pic() {
+    out_port_b(0x20, 0x11);
+    out_port_b(0xA0, 0x11);
 
-    outPortB(0x21, 0x20);
-    outPortB(0xa1, 0x28);
+    out_port_b(0x21, 0x20);
+    out_port_b(0xa1, 0x28);
 
-    outPortB(0x21, 0x04);
-    outPortB(0xa1, 0x02);
+    out_port_b(0x21, 0x04);
+    out_port_b(0xa1, 0x02);
 
-    outPortB(0x21, 0x01);
-    outPortB(0xa1, 0x01);
+    out_port_b(0x21, 0x01);
+    out_port_b(0xa1, 0x01);
 
-    outPortB(0x21, 0x0);
-    outPortB(0xa1, 0x0);
+    out_port_b(0x21, 0x0);
+    out_port_b(0xa1, 0x0);
 }
 
-void setupGates() {
+static void setup_gates() {
     set_int_gate(0, (uint64_t) isr0, 0, 0, false);
     set_int_gate(1, (uint64_t) isr1, 0, 0, false);
     set_int_gate(2, (uint64_t) isr2, 0, 0, false);
@@ -61,7 +61,7 @@ void setupGates() {
     set_int_gate(177, (uint64_t) isr177, 0, 0, false); // system calls
 }
 
-void setupIRQ() {
+static void setup_IRQ() {
     set_int_gate(32, (uint64_t) irq0, 0, 0, false);
     set_int_gate(33, (uint64_t) irq1, 0, 0, false);
     set_int_gate(34, (uint64_t) irq2, 0, 0, false);
@@ -80,20 +80,20 @@ void setupIRQ() {
     set_int_gate(47, (uint64_t) irq15, 0, 0, false);
 }
 
-void enableInterrupts() {
+static void enable_interrupts() {
     asm volatile("sti;"); // enable interrupts
 }
 
-void initIdt(){
+void init_idt(){
     memset(&idt, 0, sizeof(idt));
     idt_pointer.base = (uint64_t) &idt;
     idt_pointer.limit = (uint16_t) sizeof(struct idt_entry) * 256 - 1;
 
-    setupPic();
-    setupGates();
-    setupIRQ();
+    setup_pic();
+    setup_gates();
+    setup_IRQ();
     load_idt(&idt_pointer);
-    enableInterrupts();
+    enable_interrupts();
 }
 
 void set_int_gate(uint8_t num, uint64_t addr, uint8_t ist, uint8_t dpl, bool user) {

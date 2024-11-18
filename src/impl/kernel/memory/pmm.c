@@ -1,4 +1,6 @@
 #include "memory.h"
+#include "memory_utils.h"
+#include "print.h"
 #include "stdint.h"
 
 uint64_t V2P(uint64_t vaddr) {
@@ -22,6 +24,6 @@ uint64_t pmm_alloc() {
 
 uint64_t pmm_calloc() {
     uint64_t page = pmm_alloc();
-    memset(P2V(page), 0, PAGE_SIZE);
+    memset((void*)P2V(page), 0, PAGE_SIZE);
     return page;
 }

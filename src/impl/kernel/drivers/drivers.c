@@ -1,6 +1,6 @@
 #include "drivers.h"
 #include "mouse.h"
 
-void initializeDrivers() {
-    initializePS2Mouse();
+void initialize_drivers() {
+    initialize_PS2_mouse();
 }

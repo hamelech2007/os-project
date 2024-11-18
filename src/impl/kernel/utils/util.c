@@ -8,13 +8,13 @@ void panic() {
     for(;;);
 }
 
-void outPortB(uint16_t port, uint8_t value) {
+void out_port_b(uint16_t port, uint8_t value) {
     asm volatile ("outb %1, %0" : : "dN" (port), "a" (value));
 }
 
 
 
-uint8_t inPortB(uint16_t port) {
+uint8_t in_port_b(uint16_t port) {
     uint8_t value;
 
     // Inline assembly to read a byte from the specified port

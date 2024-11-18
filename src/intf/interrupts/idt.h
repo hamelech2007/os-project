@@ -17,7 +17,7 @@ struct idt_ptr {
     uint64_t base;
 } __attribute__((packed));
 
-void initIdt();
+void init_idt();
 void store_idt(struct idt_ptr *idtr);
 void load_idt(struct idt_ptr *idtr);
 void set_gate_offset(struct idt_entry *gate, uint64_t addr);
