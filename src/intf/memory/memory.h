@@ -1,9 +1,13 @@
 #pragma once
 #include "stdint.h"
 #include "multiboot.h"
+#include <stddef.h>
+
+extern uint8_t page_table_l4;
 
 #define KERNEL_OFFSET   0xffffffff80000000
 #define PAGE_SIZE       0x1000                  // 1KB 
+#define GIGABYTE        0x40000000              // 1GB
 
 #define PAGE_PRESENT      0x001
 #define PAGE_WRITE        0x002
@@ -83,6 +87,7 @@ uint64_t V2P(uint64_t vaddr);
 uint64_t P2V(uint64_t phaddr);
 
 uint64_t vmm_get_page(uint64_t pml4, uint64_t vaddr);
+bool vmm_set_page(uint64_t pml4, uint64_t addr, uint64_t page, uint16_t flags);
 bool vmm_page_exists(uint64_t page_start);
 void vmm_clear_page(uint64_t pml4, uint64_t addr, bool free);
 bool vmm_page_exists(uint64_t page_start);
@@ -93,3 +98,5 @@ uint64_t pmm_calloc();
 
 void* kalloc_page();
 void kfree_page(void* page_start);
+
+void kheap_init();

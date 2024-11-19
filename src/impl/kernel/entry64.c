@@ -6,6 +6,7 @@
 #include "drivers.h"
 #include "multiboot.h"
 #include "memory.h"
+#include "kheap.h"
 
 extern void error();
 extern void kernel_main();
@@ -18,6 +19,8 @@ void entry_64(struct MultibootTaglist* boot_info_addr) {
 
     parse_tags(boot_info_addr);
     init_memory();
+    kheap_init();
+    
 
     init_gdt(); // initialize global descriptor table
     init_idt(); // initialize interrupt descriptor table
