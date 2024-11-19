@@ -2,9 +2,9 @@
 #include "stdint.h"
 #include "stdio.h"
 #include "print.h"
-#include "stdarg.h"
+#include <stdarg.h>
 
-void printf_number(uint64_t value, int length, bool sign, int radix);
+
 
 #define PRINTF_STATE_NORMAL         0
 #define PRINTF_STATE_LENGTH         1
@@ -20,13 +20,10 @@ void printf_number(uint64_t value, int length, bool sign, int radix);
 
 
 void printf(const char* fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
     int state = PRINTF_STATE_NORMAL;
     int length = PRINTF_LENGTH_DEFAULT;
-    uint64_t *argp;
-
-    // code to get argp - can't be in another function cause then frame will be messed up
-    asm volatile("movq %%rbp, %0" : "=r"(argp) : :);
-    argp+=2; // argp now points to the theoretical 7th param
 
     int radix = 10;
     bool sign = false;
@@ -77,31 +74,31 @@ void printf(const char* fmt, ...) {
             PRINTF_STATE_SPEC_:
                 switch (*fmt)
                 {
-                    case 'c':   print_char((char) GET_VA_ARG(paramNum));
+                    case 'c':   print_char(va_arg(args, char));
                                 paramNum++;
                                 break;
-                    case 's':   print_str((char*) GET_VA_ARG(paramNum));
+                    case 's':   print_str(va_arg(args, char*));
                                 paramNum++;
                                 break;
                     case '%':   print_char('%');
                                 break;
                     case 'd':
                     case 'i':   radix = 10; sign = true;
-                                printf_number(GET_VA_ARG(paramNum), length, sign, radix);
+                                printf_number(va_arg(args, uint64_t), length, sign, radix);
                                 paramNum++;
                                 break;
                     case 'u':   radix = 10; sign = false;
-                                printf_number(GET_VA_ARG(paramNum), length, sign, radix);
+                                printf_number(va_arg(args, uint64_t), length, sign, radix);
                                 paramNum++;
                                 break;
                     case 'X':
                     case 'x':
                     case 'p':   radix = 16; sign = false;
-                                printf_number(GET_VA_ARG(paramNum), length, sign, radix);
+                                printf_number(va_arg(args, uint64_t), length, sign, radix);
                                 paramNum++;
                                 break;
                     case 'o':   radix = 8; sign = false;
-                                printf_number(GET_VA_ARG(paramNum), length, sign, radix);
+                                printf_number(va_arg(args, uint64_t), length, sign, radix);
                                 paramNum++;
                                 break;
                     default: break; // ignore invalid specifiers
@@ -115,6 +112,7 @@ void printf(const char* fmt, ...) {
         }
         fmt++;
     }
+    va_end(args);
 }
 
 const char g_HexChars[] = "0123456789abcdef";

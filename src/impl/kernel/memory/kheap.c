@@ -5,8 +5,8 @@
 #include <stddef.h>
 
 
-#define ROUND_PAGE(addr) (((uint64_t)(addr) + 0x0fff) & (uint64_t)~0x0fff)
-#define MASK_ALLOCATED(size) ((uint16_t)(size) & 0xfff8)
+#define ROUND_PAGE(addr) (((uint64_t)(addr) + 0x0fff) & (uint64_t)~0x0fff)  // round to the upper page
+#define MASK_ALLOCATED(size) ((uint16_t)(size) & 0xfff8)                    // mask the allocated flag
 
 extern uint8_t _kernel_end;
 uint8_t *heap_addr_start, *heap_addr_end;
@@ -30,7 +30,7 @@ void add_new_page(uint64_t vpage){
 }
 
 void *allocate_heap_page(){
-    // todo implement
+
     void* next_page_vaddr = heap_addr_end;
     uint64_t page = vmm_get_page((uint64_t)&page_table_l4, (uint64_t)next_page_vaddr);
 
@@ -56,7 +56,7 @@ uint64_t get_heap_size() {
 }
 
 void kheap_init() {
-    uint64_t start_vaddr = ((uint64_t)ROUND_PAGE(&_kernel_end) + (uint64_t)GIGABYTE/2);
+    uint64_t start_vaddr = ((uint64_t)ROUND_PAGE(&_kernel_end) + (uint64_t)GIGABYTE/2); // FOR FUTURE DEBUGGING: The heap begins 512MB after the &_kernel_end
 
     heap_addr_start = heap_addr_end = start_vaddr;
 }

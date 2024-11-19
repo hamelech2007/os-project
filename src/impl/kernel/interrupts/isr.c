@@ -103,9 +103,7 @@ void irq_handler(struct int_regs* regs) {
 }
 
 void unimplemented(struct int_regs* regs) {
-    print_str("Unimplemented Interrupt Recieved! Number: ");
-    print_int(regs->int_num);
-    print_char('\n');
+    printf("Unimplemented Interrupt Recieved! Number: %d, Error Code: %d\n", regs->int_num, regs->err_code);
 }
 
 
@@ -117,31 +115,18 @@ void divide_by_zero(struct int_regs* regs) {
 
 void invalid_opcode(struct int_regs* regs) {
     print_set_color(PRINT_COLOR_WHITE, PRINT_COLOR_RED);
-    print_str("Invalid opcode recieved at address: 0x");
-    print_hex(regs->rip);
-    print_str("\n4 bytes following RIP: 0x");
-    print_hex(*(uint8_t*)regs->rip);
-    print_str(" 0x");
-    print_hex(*(uint8_t*)(regs->rip + 1));
-    print_str(" 0x");
-    print_hex(*(uint8_t*)(regs->rip + 2));
-    print_str(" 0x");
-    print_hex(*(uint8_t*)(regs->rip + 3));
+    printf("\nInvalid opcode recieved at address: 0x%p\n4 bytes following RIP: 0x%x 0x%x 0x%x 0x%x",
+     regs->rip, *(uint8_t*)regs->rip, *(uint8_t*)(regs->rip + 1), *(uint8_t*)(regs->rip + 2), *(uint8_t*)(regs->rip + 3));
     for(;;);
 }
 
 void general_protection(struct int_regs* regs) {
-    print_str("General Protection Fault! Error code: ");
-    print_int(regs->err_code);
-    print_char('\n');
+    printf("General Protection Fault! Error code: 0x%x\n", regs->err_code);
 }
 
 void reserved(struct int_regs* regs) {
-    print_str("Interrupt Recieved! Interrupt Number: ");
-    print_int((uint8_t) regs->int_num);
-    print_str(" Description: ");
-    print_str(interrupt_messages[regs->int_num]);
-    print_char('\n');
+    printf("Reserved interrupt number: %d", regs->int_num);
+    panic();
 }
 
 

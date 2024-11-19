@@ -43,14 +43,7 @@ void parse_command() {
             // command found
             if(strcmp(command, "uptime")) {
                 uint64_t uptime = startup_timer*59.9;
-                print_char('\n');
-                print_str("The OS has been up for ");
-                print_int((uptime/1000)/60/60 % 60);
-                print_str(" hours, ");
-                print_int((uptime/1000)/60 % 60);
-                print_str(" minutes and ");
-                print_int((uptime/1000) % 60);
-                print_str(" seconds!\n");
+                printf("\nThe OS has been up for %d hours, %d minutes and %d seconds!\n", (uptime/1000)/60/60 % 60, (uptime/1000)/60/60 % 60, (uptime/1000) % 60);
                 return;
             }
             return;
