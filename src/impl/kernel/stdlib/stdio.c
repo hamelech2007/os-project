@@ -28,9 +28,6 @@ void printf(const char* fmt, ...) {
     int radix = 10;
     bool sign = false;
 
-    uint64_t paramNum = 2;
-
-
     while(*fmt) {
         switch(state) {
             case PRINTF_STATE_NORMAL:
@@ -74,32 +71,26 @@ void printf(const char* fmt, ...) {
             PRINTF_STATE_SPEC_:
                 switch (*fmt)
                 {
-                    case 'c':   print_char(va_arg(args, char));
-                                paramNum++;
+                    case 'c':   print_char((uint8_t)va_arg(args, uint32_t)); // can't use char because the data type is too small
                                 break;
                     case 's':   print_str(va_arg(args, char*));
-                                paramNum++;
                                 break;
                     case '%':   print_char('%');
                                 break;
                     case 'd':
                     case 'i':   radix = 10; sign = true;
                                 printf_number(va_arg(args, uint64_t), length, sign, radix);
-                                paramNum++;
                                 break;
                     case 'u':   radix = 10; sign = false;
                                 printf_number(va_arg(args, uint64_t), length, sign, radix);
-                                paramNum++;
                                 break;
                     case 'X':
                     case 'x':
                     case 'p':   radix = 16; sign = false;
                                 printf_number(va_arg(args, uint64_t), length, sign, radix);
-                                paramNum++;
                                 break;
                     case 'o':   radix = 8; sign = false;
                                 printf_number(va_arg(args, uint64_t), length, sign, radix);
-                                paramNum++;
                                 break;
                     default: break; // ignore invalid specifiers
                 }

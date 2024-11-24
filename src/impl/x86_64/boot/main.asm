@@ -84,7 +84,7 @@ setup_page_tables:
 
     leal page_table_l2_higher, %eax
     orl $0b11, %eax # present, writable flags
-    movl %eax, page_table_l3_higher+4080 # pdpt[510]
+    movl %eax, page_table_l3_higher # pdpt[510]
 
     leal page_table_l1, %eax
     orl $0b11, %eax

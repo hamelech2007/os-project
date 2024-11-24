@@ -28,30 +28,30 @@ SECTIONS
         . = ALIGN(4K);
     }
 
-    . += 0xffffffff80000000;
+    . += 0xFFFFFF8000000000;
 
     _kernel_start = .;
 
-    .text BLOCK(4K) : AT(ADDR(.text) - 0xffffffff80000000)
+    .text BLOCK(4K) : AT(ADDR(.text) - 0xFFFFFF8000000000)
     {   
         *(.text)
         . = ALIGN(4K);
     }
 
     
-    .rodata BLOCK(4K) : AT(ADDR(.rodata) - 0xffffffff80000000)
+    .rodata BLOCK(4K) : AT(ADDR(.rodata) - 0xFFFFFF8000000000)
     {
         *(.rodata)
         . = ALIGN(4K);
     }
 
-    .data BLOCK(4K) : AT(ADDR(.data) - 0xffffffff80000000)
+    .data BLOCK(4K) : AT(ADDR(.data) - 0xFFFFFF8000000000)
     {
         *(.data)
         . = ALIGN(4K);
     }
 
-    .bss BLOCK(4K) : AT(ADDR(.bss) - 0xffffffff80000000)
+    .bss BLOCK(4K) : AT(ADDR(.bss) - 0xFFFFFF8000000000)
     {
         *(COMMON)
         *(.bss)

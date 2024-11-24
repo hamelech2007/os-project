@@ -14,17 +14,16 @@ extern void kernel_main();
 struct KernelBootData kernel_boot_data;
 
 void enable_floating_point();
-
+extern struct HeapBlock* first_free_block;
 void entry_64(struct MultibootTaglist* boot_info_addr) {
-
+    
     parse_tags(boot_info_addr);
     init_memory();
     kheap_init();
 
-
     init_gdt(); // initialize global descriptor table
     init_idt(); // initialize interrupt descriptor table
-    initialize_drivers(); // initialize drivers
+    init_drivers(); // initialize drivers
 
 
     enable_floating_point();

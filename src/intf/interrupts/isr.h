@@ -16,6 +16,7 @@ void unimplemented(struct int_regs* regs);
 void divide_by_zero(struct int_regs* regs);
 void invalid_opcode(struct int_regs* regs);
 void general_protection(struct int_regs* regs);
+void page_fault(struct int_regs* regs);
 void reserved(struct int_regs* regs);
 
 

@@ -2,6 +2,7 @@
 #include "memory_utils.h"
 #include "stdint.h"
 #include "kheap.h"
+#include "util.h"
 #include <stddef.h>
 
 
@@ -56,7 +57,7 @@ uint64_t get_heap_size() {
 }
 
 void kheap_init() {
-    uint64_t start_vaddr = ((uint64_t)ROUND_PAGE(&_kernel_end) + (uint64_t)GIGABYTE/2); // FOR FUTURE DEBUGGING: The heap begins 512MB after the &_kernel_end
+    uint64_t start_vaddr = ((uint64_t)ROUND_PAGE(&_kernel_end) + (uint64_t)GIGABYTE); // FOR FUTURE DEBUGGING: The heap begins 1GB after the &_kernel_end
 
     heap_addr_start = heap_addr_end = start_vaddr;
 }
@@ -167,6 +168,14 @@ void *kmalloc(size_t size){
     return (uint8_t*)best_block + sizeof(union BoundaryTag);
 }
 
+void *kcalloc(size_t size) {
+    void *mem = kmalloc(size);
+    if(!mem) return NULL;
+
+    memset(mem, 0, size);
+    return mem;
+}
+
 void kfree(void* ptr){
     struct HeapBlock* block = (struct HeapBlock*) ((uint8_t*)ptr - sizeof(union BoundaryTag));
 
@@ -252,4 +261,145 @@ void kfree(void* ptr){
 
     
     
+}
+
+size_t bytes_needed_for_alignment(void* ptr, size_t align) {
+    if (!align) {
+        return 0; // No alignment required
+    }
+    uint64_t addr = (uint64_t)ptr;
+    return (align - (addr % align)) % align;
+}
+
+/// @brief  Returns a block large enough so that if you align it, you can still have enough space for your allocation. Note, when freeing, pass the original allocated ptr.
+/// @param size The size of the block you wish to allocate.
+/// @param align The alignment you require that the block would be large enough to satisfy.
+/// @return A free block that is large enough to align but still have enough space for the allocation.
+void* aligned_kmalloc(size_t size, size_t align) {
+    if(!align) return kmalloc(size);
+
+
+    if(size < sizeof(struct HeapBlock)) size = sizeof(struct HeapBlock);
+    size = (size + 2 * sizeof(union BoundaryTag) + 7) & ~7; // align size to 8
+    size -= 2 * sizeof(union BoundaryTag);
+    if(get_heap_size() + size > MAX_HEAP_SIZE) return NULL;
+    
+    if(get_heap_size() == 0 || !first_free_block){
+        first_free_block = allocate_heap_page();
+        if(!first_free_block) return NULL;
+    }
+
+    struct HeapBlock* current_block = first_free_block;
+    struct HeapBlock* best_block = NULL;
+
+    while(current_block) {
+        size_t block_size = MASK_ALLOCATED(current_block->tag_start.size);
+        if(block_size - 2 * sizeof(union BoundaryTag) < size) {
+            current_block = current_block->next;
+            continue;
+        }
+
+        uint64_t malloc_address_start = (uint64_t)incptr(current_block, sizeof(union BoundaryTag));
+        if(size + bytes_needed_for_alignment(malloc_address_start, align) > (current_block->tag_start.size - 2 * sizeof(union BoundaryTag))) {
+            current_block = current_block->next;
+            continue;
+        }
+
+        if(!best_block) {
+            best_block = current_block;
+            current_block = current_block->next;
+            continue;
+        }
+
+        if(block_size < best_block->tag_start.size) {
+            best_block = current_block;
+            current_block = current_block->next;
+            continue;
+        }
+
+        current_block = current_block->next;
+    }
+
+    if(!best_block) {
+        if(!allocate_heap_page()) return NULL;
+        return aligned_kmalloc(size, align);
+    }
+
+    size += bytes_needed_for_alignment(incptr(current_block, sizeof(union BoundaryTag)), align);
+
+    size_t block_size = MASK_ALLOCATED(best_block->tag_start.size);
+
+    if(block_size - size - 2 * sizeof(union BoundaryTag) < sizeof(struct HeapBlock)) {
+        // allocate the entire block because we can't split
+        if(best_block->prev) {
+            struct HeapBlock* prev_block = best_block->prev;
+            prev_block->next = best_block->next;
+        }
+        
+        if(best_block->next) {
+            struct HeapBlock* next_block = best_block->next;
+            next_block->prev = best_block->prev;
+        }
+        
+        if(first_free_block == best_block) {
+            first_free_block = best_block->next;
+        }
+
+        best_block->tag_start.allocated = true;
+        ((union BoundaryTag*)((uint8_t*)best_block+MASK_ALLOCATED(best_block->tag_start.size) - sizeof(union BoundaryTag)))->allocated = true;
+
+        memset((uint8_t*)best_block + sizeof(union BoundaryTag), 0, 2 * sizeof(uint64_t));
+
+        return (uint8_t*)best_block + sizeof(union BoundaryTag);
+    }
+
+    // we can split
+    struct HeapBlock* new_block = (uint8_t*)best_block + size + 2 * sizeof(union BoundaryTag);
+    union BoundaryTag new_block_tag;
+
+    new_block_tag.size = block_size - size - 2 * sizeof(union BoundaryTag);
+    new_block_tag.allocated = false;
+    new_block->tag_start = *((union BoundaryTag*)((uint8_t*)new_block + MASK_ALLOCATED(new_block->tag_start.size) - sizeof(union BoundaryTag))) = new_block_tag;
+
+    if(first_free_block == best_block) {
+        first_free_block = new_block;
+    }
+
+    if(best_block->prev) {
+        struct HeapBlock* prev_block = best_block->prev;
+        new_block->prev = prev_block;
+        prev_block->next = new_block;
+    }
+
+    if(best_block->next) {
+        struct HeapBlock* next_block = best_block->next;
+        new_block->next = next_block;
+        next_block->prev = new_block;
+    }
+
+    union BoundaryTag* best_block_end_tag = (uint8_t*)best_block + MASK_ALLOCATED(best_block->tag_start.size) - sizeof(union BoundaryTag);
+    best_block->tag_start.size = size + 2 * sizeof(union BoundaryTag);
+    best_block_end_tag->size = size + 2 * sizeof(union BoundaryTag);
+    best_block->tag_start.allocated = true;
+    best_block_end_tag->allocated = true;
+
+    
+    memset(best_block + sizeof(union BoundaryTag), 0, 2 * sizeof(uint64_t));
+    
+
+
+    return (uint8_t*)best_block + sizeof(union BoundaryTag);
+
+}
+
+void *aligned_kcalloc(size_t size, size_t align) {
+    void *mem = aligned_kmalloc(size, align);
+    if(!mem) return NULL;
+
+    memset(align_allocated(mem, align), 0, size);
+    return mem;
+}
+
+void* align_allocated(void* ptr, uint64_t align) {
+    return incptr(ptr, bytes_needed_for_alignment(ptr, align));
 }

@@ -7,7 +7,7 @@ class StopOnPValue(gdb.Command):
         super(StopOnPValue, self).__init__("stop_on_p_value", gdb.COMMAND_USER)
 
     def invoke(self, arg, from_tty):
-        target_value = 0x200000
+        target_value = 0x10d000
         while True:
             try:
                 # Attempt to evaluate the variable 'p'

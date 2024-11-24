@@ -141,6 +141,9 @@ void print_int(uint64_t num) {
     print_str(buffer + i + 1);
 
 }
+uint8_t print_get_color() {
+    return color;
+}
 
 void print_set_color(uint8_t foreground, uint8_t background) {
     color = foreground | (background << 4);

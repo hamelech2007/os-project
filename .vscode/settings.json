@@ -22,6 +22,12 @@
         "string.h": "c",
         "drivers.h": "c",
         "memory_utils.h": "c",
-        "kheap.h": "c"
+        "kheap.h": "c",
+        "thread.h": "c",
+        "rsdp.h": "c",
+        "acpi.h": "c",
+        "apic.h": "c",
+        "pci.h": "c",
+        "ahci.h": "c"
     }
 }

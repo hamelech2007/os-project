@@ -4,6 +4,7 @@
 #include "print.h"
 #include "keyboard.h"
 #include "mouse.h"
+#include "memory.h"
 
 void pic_EOI() {
     out_port_b(0x20, 0x20);
@@ -64,7 +65,7 @@ void (*isr_routines[])(struct int_regs*) = {
     reserved,
     reserved,
     general_protection,
-    reserved,
+    page_fault,
     reserved,
     reserved,
     reserved,
@@ -122,6 +123,27 @@ void invalid_opcode(struct int_regs* regs) {
 
 void general_protection(struct int_regs* regs) {
     printf("General Protection Fault! Error code: 0x%x\n", regs->err_code);
+}
+
+
+
+void page_fault(struct int_regs* regs) {
+    uint8_t color = print_get_color();
+    print_set_color(PRINT_COLOR_WHITE, PRINT_COLOR_RED);
+    printf("Page fault at address: 0x%lp when trying to access 0x%lp\n", regs->rip, regs->cr2);
+    print_set_color(color, color >> 4);
+    
+    uint64_t page = vmm_get_page(&page_table_l4, regs->cr2);
+    uint64_t phys_page = V2P(regs->cr2) & ((uint64_t)~0xfff);
+    if(!(page & PAGE_PRESENT) || !vmm_page_exists(page)){
+        uint16_t flags = PAGE_GLOBAL | PAGE_WRITE;
+        vmm_set_page(&page_table_l4, regs->cr2, phys_page, flags | PAGE_PRESENT);
+        invalidate(regs->cr2);
+        return;
+    }
+
+
+    panic(); // no page fault implementation
 }
 
 void reserved(struct int_regs* regs) {

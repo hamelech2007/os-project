@@ -3,9 +3,6 @@
 #include "print.h"
 #include "stdint.h"
 
-uint64_t V2P(uint64_t vaddr) {
-    return vaddr - KERNEL_OFFSET;
-}
 
 static uint64_t next = 0;
 

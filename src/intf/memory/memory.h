@@ -5,7 +5,7 @@
 
 extern uint8_t page_table_l4;
 
-#define KERNEL_OFFSET   0xffffffff80000000
+#define KERNEL_OFFSET   0xffffff8000000000
 #define PAGE_SIZE       0x1000                  // 1KB 
 #define GIGABYTE        0x40000000              // 1GB
 

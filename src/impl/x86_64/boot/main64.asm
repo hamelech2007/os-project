@@ -18,7 +18,8 @@ long_mode_start:
     movw %ax, %gs
 
     movq %rsp, %rax
-    leaq stack_top, %rsp
+    
+    movabs $stack_top, %rsp
     pushq %rax
 
     call entry_64

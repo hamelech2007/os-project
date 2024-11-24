@@ -1,5 +1,6 @@
 #pragma once
 #include "stdint.h"
+#include "acpi.h"
 
 
 struct MultibootTaglist {
@@ -37,6 +38,7 @@ struct KernelBootData
   uint8_t multiboot_version;
   char *bootloader;
   char *commandline;
+  struct RSDP_t* rsdp;
   uint32_t mmap_size;
   uint32_t mmap_len;
   struct MultibootMmap *mmap;
@@ -45,6 +47,7 @@ struct KernelBootData
 #define MULTIBOOT_BOOTLOADER_NAME   2
 #define MULTIBOOT_COMMANDLINE       1
 #define MULTIBOOT_MMAP              6
+#define MULTIBOOT_OLD_RSDP          14
 
 void parse_tags(struct MultibootTaglist* tag_list);
 struct MultibootMmapEntry* get_memory_area_from_multiboot(uint8_t index);

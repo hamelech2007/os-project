@@ -4,3 +4,4 @@ dist/*
 .vscode/*
 bx_enh_dbg.ini
 virtual_disk.qcow2
+disk.img

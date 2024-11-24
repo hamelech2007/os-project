@@ -1,3 +1,3 @@
 #pragma once
 
-void initialize_drivers();
+void init_drivers();

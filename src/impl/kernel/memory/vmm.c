@@ -46,6 +46,47 @@ uint64_t P2V(uint64_t phaddr) {
     return phaddr + KERNEL_OFFSET;
 }
 
+// Function to resolve virtual to physical address
+uint64_t V2P_specific(uint64_t pml4, uint64_t vaddr) {
+    // Traverse through the levels of the page table hierarchy
+    uint64_t p4_entry = P4E(pml4, vaddr);
+    if (!(p4_entry & 1)) { // Check if present flag is set
+        return vaddr - KERNEL_OFFSET; // Invalid mapping
+    }
+
+    uint64_t p3_entry = P3E(pml4, vaddr);
+    if (!(p3_entry & 1)) { // Check if present flag is set
+        return vaddr - KERNEL_OFFSET; // Invalid mapping
+    }
+
+    uint64_t p2_entry = P2E(pml4, vaddr);
+    if (!(p2_entry & 1)) { // Check if present flag is set
+        return vaddr - KERNEL_OFFSET; // Invalid mapping
+    }
+
+    uint64_t p1_entry = P1E(pml4, vaddr);
+    if (!(p1_entry & 1)) { // Check if present flag is set
+        return vaddr - KERNEL_OFFSET; // Invalid mapping
+    }
+
+    struct pt_entry *p1e = p1_entry;
+    
+
+    // Calculate the physical address
+    uint64_t physical_address = (p1_entry & ~0xFFF) // Base address from the PTE
+                                | (vaddr & 0xFFF); // Offset from the virtual address
+    return physical_address;
+}
+
+uint64_t V2P(uint64_t vaddr) {
+    uint64_t phaddr = V2P_specific(&page_table_l4, vaddr);
+    return phaddr ? phaddr : vaddr - KERNEL_OFFSET;
+}
+
+/*uint64_t V2P(uint64_t vaddr) {
+    return vaddr - KERNEL_OFFSET;
+}*/
+
 uint64_t vmm_get_page(uint64_t pml4, uint64_t vaddr) {
     if(pml4 && PRESENT(P4E(pml4, vaddr)) && PRESENT(P3E(pml4, vaddr)) && PRESENT(P2E(pml4, vaddr)) && PRESENT(P1E(pml4, vaddr))) 
         return P1E(pml4, vaddr);

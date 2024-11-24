@@ -4,12 +4,14 @@
 #include "memory.h"
 #include "stdint.h"
 #include "string.h"
+#include "stdio.h"
+#include "acpi.h"
 
 
 extern struct KernelBootData kernel_boot_data;
 
 void parse_tags(struct MultibootTaglist* tag_list) {
-
+    kernel_boot_data.rsdp = NULL;
     struct MultibootTag* tag = ((uint8_t*) tag_list) + sizeof(struct MultibootTaglist);
 
     while(tag->type){
@@ -24,6 +26,11 @@ void parse_tags(struct MultibootTaglist* tag_list) {
                 kernel_boot_data.mmap = tag->data;
                 kernel_boot_data.mmap_len = (tag->size - 8)/kernel_boot_data.mmap->entry_size;
                 kernel_boot_data.mmap_size = tag->size - 8;
+                break;
+            case MULTIBOOT_OLD_RSDP:
+                kernel_boot_data.rsdp = tag->data;
+            default:
+                printf("Multiboot2 tag number %d detected of size 0x%x.\n", tag->type, tag->size);
                 break;
         }
 
