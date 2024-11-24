@@ -28,6 +28,8 @@
         "acpi.h": "c",
         "apic.h": "c",
         "pci.h": "c",
-        "ahci.h": "c"
+        "ahci.h": "c",
+        "exfat.h": "c",
+        "fat32.h": "c"
     }
 }

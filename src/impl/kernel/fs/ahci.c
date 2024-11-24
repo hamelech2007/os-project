@@ -7,6 +7,7 @@
 #include "kheap.h"
 #include "memory_utils.h"
 #include "util.h"
+#include "fat32.h"
 
 struct HBA_MEM* ahci_base_vaddr = NULL;
 
@@ -167,7 +168,7 @@ int find_cmdslot(struct HBA_PORT *port) {
     return -1;
 }
 
-bool read(struct HBA_PORT *port, uint64_t start, uint32_t sectors, uint16_t *buf) {
+bool ahci_read_sectors(struct HBA_PORT *port, uint64_t start, uint32_t sectors, uint16_t *buf) {
     port->is = (uint32_t) -1;
     uint32_t spinlock = 0;
     int slot = find_cmdslot(port);
@@ -267,6 +268,12 @@ void parse_ahci(uint8_t bus, uint8_t device, uint8_t function) {
             case AHCI_DEV_SATA:
                 printf("SATA drive found at port %d, rebasing...\n", i);
                 rebase_ahci_port(port);
+                if(get_sata_device() != NULL) {
+                    printf("More than one single SATA device were found. This OS doesn't support it yet.\n");
+                    panic();
+                }
+
+                set_sata_device(port);
                 break;
             case AHCI_DEV_SATAPI:
                 printf("SATAPI drive found at port %d\n", i);
@@ -281,14 +288,6 @@ void parse_ahci(uint8_t bus, uint8_t device, uint8_t function) {
                 printf("No drive found at port %d\n", i);
         }
         
-    }
-
-    uint16_t buf[1024];
-    if(!read(&ahci_base_vaddr->ports[0], 0, 1, buf)) {
-        printf("DAMN\n");
-        panic();
-    } else {
-        printf("WHOOOOOOO! Couple bytes from the read data: 0x%x 0x%x 0x%x 0x%x\n", buf[0], buf[1], buf[2], buf[3]);
     }
 
     

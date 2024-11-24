@@ -1,4 +1,5 @@
-kernel_source_files := $(shell find src/impl/kernel -name *.c ! -name *32.c)
+#kernel_source_files := $(shell find src/impl/kernel -name *.c ! -name *32.c)
+kernel_source_files := $(shell find src/impl/kernel -name *.c)
 kernel_object_files := $(patsubst src/impl/kernel/%.c, build/kernel/%.o, $(kernel_source_files))
 
 #kernel32_source_files := $(shell find src/impl/kernel -name *32.c)

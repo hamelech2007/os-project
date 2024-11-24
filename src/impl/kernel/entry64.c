@@ -1,4 +1,5 @@
 #include "print.h"
+#include "fat32.h"
 #include "gdt.h"
 #include "stdio.h"
 #include "idt.h"
@@ -7,6 +8,7 @@
 #include "multiboot.h"
 #include "memory.h"
 #include "kheap.h"
+
 
 extern void error();
 extern void kernel_main();
@@ -24,6 +26,8 @@ void entry_64(struct MultibootTaglist* boot_info_addr) {
     init_gdt(); // initialize global descriptor table
     init_idt(); // initialize interrupt descriptor table
     init_drivers(); // initialize drivers
+
+    init_fat32(); // initialize file system
 
 
     enable_floating_point();

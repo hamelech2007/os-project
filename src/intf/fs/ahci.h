@@ -337,3 +337,4 @@ volatile struct HBA_FIS
 
 
 void parse_ahci(uint8_t bus, uint8_t device, uint8_t function);
+bool ahci_read_sectors(struct HBA_PORT *port, uint64_t start, uint32_t sectors, uint16_t *buf);
